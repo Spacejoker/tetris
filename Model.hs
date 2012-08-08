@@ -6,7 +6,8 @@ import Graphics.UI.SDL.TTF as TTF
 data Block = Block {
 	  x :: Int,
 	  y :: Int,
-	  rot :: Int
+	  rot :: Int,
+	  blockId :: Int
 	}
 
 data GameState = GameState{
@@ -15,10 +16,10 @@ data GameState = GameState{
 	  block :: Block,
 	  font :: Font,
 	  steps :: Int,
-	  field :: [[Int]]
+	  field :: [(Int, Int, Int)] -- (x, y, value)
         }
 
 blocks = [blockI]
 
 
-blockI = [[(2,0),(2,1),(2,2),(2,3)],[(0,1),(1,1),(2,1),(3,1)]] :: [[(Int, Int)]]
+blockI = [[(2,0,1),(2,1,1),(2,2,1),(2,3,1)],[(0,1,1),(1,1,1),(2,1,1),(3,1,1)]] :: [[(Int, Int, Int)]]

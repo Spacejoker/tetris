@@ -20,8 +20,8 @@ main = do
   enableKeyRepeat 500 30
 
   fnt <- openFont "font.ttf" 30
-  let fld = take 22 (repeat (take 10 (repeat 0))) :: [[Int]]
-  gameLoop (GameState True 0 (Block 4 0 0) fnt 0 fld) 
+  let fld = [(a, b, 0) | a <- [0..9], b <- [0..21]]--, take 22 (repeat (take 10 (repeat 0))) :: [[Int]]
+  gameLoop (GameState True 0 (Block 4 0 0 0) fnt 0 fld) 
 
 gameLoop :: GameState -> IO ()
 gameLoop gs = do
@@ -43,9 +43,20 @@ tick gs
   | otherwise = gs {steps = (steps gs) + 1}
 
 incrementBlock :: GameState -> GameState
-incrementBlock gs = gs {steps = 0, block = b}
-    where b' = block gs
-	  b = b' {y = ((y b')+1)}
+incrementBlock gs =
+ if (nextIsFree gs) 
+   then let b' = block gs
+	    b = b' {y = ((y b')+1)}
+        in gs {steps = 0, block = b}
+   else let b = Block 0 0 0 0
+	    fld = field gs
+	   -- fld' = addBlocks fld (block gs)
+	   -- fld = (block gs) {} 
+
+        in gs {block = b, field = fld, steps = 0 }
+
+nextIsFree :: GameState -> Bool
+nextIsFree gs = y (block gs) < 5
 
 -- stolen code from mr cadr, works nice
 getEvents :: IO Event -> [Event] -> IO [Event]
@@ -64,6 +75,7 @@ handleEvents [x] gs =
     KeyDown (Keysym SDLK_LEFT _ _) -> move (-1) gs 
     KeyDown (Keysym SDLK_ESCAPE _ _) -> gs { gameActive = False }
     KeyDown (Keysym SDLK_UP _ _) -> gs { block = (block gs) { rot = ((rot (block gs))+ 1) `mod` 2 } }
+    KeyDown (Keysym SDLK_DOWN _ _) -> gs {steps = ticksPerStep}
     _ -> gs
 
 handleEvents (x:xs) gs = handleEvents xs (handleEvents [x] gs)
@@ -84,38 +96,47 @@ render gs = do
   title <- renderTextSolid (font gs) "Tetris" (Color 255 0 0)
   blitSurface title Nothing s (Just (Rect 515 40 200 40))
   
-  paintBlock (blockI !! (rot (block gs))) (x (block gs), y (block gs)) s
+  paintBlock (map (addPosition (x (block gs)) (y (block gs))) (blockI !! (rot (block gs))) ) s-- (x (block gs), y (block gs)) 1 s
 
   paintField (field gs) s 0
 
   SDL.flip s
 
-paintField :: [[Int]] -> Surface -> Int -> IO()
+addPosition x y (a, b, c) = (a+x, b+y, c)
+--	paintField :: [(Int, Int, Int)] -> Surface -> Int -> IO()
+--	paintField [] _ _ = do return ()
+--	paintField ((a, b, c):xs) s height = do
+--	  paintBlock [(a, b)] c s 
+--	  paintField xs s (height+1)
+
+	-- paintBlocks :: [Int] -> Surface -> Int -> Int -> IO()
+	-- paintBlocks [] s y x = do return ()
+	-- paintBlocks (x:xs) s y' x' = do
+--   if x > 0 then paintBlock [(x', y')] (0, 0) s else return ()
+--   paintBlocks xs s y' (x'+1)
+paintField :: [(Int, Int, Int)] -> Surface -> Int -> IO()
 paintField [] _ _ = do return ()
-paintField (x:xs) s height = do
-  paintBlocks x s height 0
+paintField ((a, b, c):xs) s height = do
+  paintBlock [(a, b, c)] s 
   paintField xs s (height+1)
 
-paintBlocks :: [Int] -> Surface -> Int -> Int -> IO()
-paintBlocks [] s y x = do return ()
-paintBlocks (x:xs) s y' x' = do
-  if x > 0 then paintBlock [(x', y')] (0, 0) s else return ()
-  paintBlocks xs s y' (x'+1)
+paintBlock :: [(Int, Int, Int)] -> Surface -> IO()
+paintBlock [x] s = do 
+  paintSquare x s
+paintBlock (x:xs) s= do
+  paintSquare x s
+  paintBlock xs s
 
-paintBlock :: [(Int, Int)] -> (Int, Int) -> Surface -> IO()
-paintBlock [x] pos s = do 
-  paintSquare x pos s 1
-paintBlock (x:xs) pos s = do
-  paintSquare x pos s 1
-  paintBlock xs pos s
-
-paintSquare :: (Int, Int) -> (Int, Int) -> Surface -> Int -> IO()
-paintSquare pair pos s color = do
-  let x' = ((fst pos) + fst pair) * dim + leftOffset
-  let y' = ((snd pos) + snd pair) * dim + topOffset
-  if color > 0 then fillRect s (Just (Rect x' y' dim dim)) (Pixel 1516) else return True 
+paintSquare :: (Int, Int, Int) -> Surface -> IO()
+paintSquare (a, b, c) s = do
+  let x' = a * dim + leftOffset
+  let y' = b * dim + topOffset
+  if c > 0 then fillRect s (Just (Rect x' y' dim dim)) (Pixel 255) else return True 
   return ()
 -- orangeblock <- loadBMP' "data/orangeblock.bmp"
+
+color :: Int -> Int
+color c = 255
 
 move :: Int -> GameState -> GameState
 move d gs = gs'
