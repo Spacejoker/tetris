@@ -35,7 +35,7 @@ gameLoop gs = do
  
   if (gameActive gs')
     then gameLoop  (tick gs')
-    else quit'
+    else return ()
 
 tick :: GameState -> GameState
 tick gs
@@ -46,9 +46,6 @@ incrementBlock :: GameState -> GameState
 incrementBlock gs = gs {steps = 0, block = b}
     where b' = block gs
 	  b = b' {y = ((y b')+1)}
-
-quit' :: IO ()
-quit' = return ()
 
 -- stolen code from mr cadr, works nice
 getEvents :: IO Event -> [Event] -> IO [Event]
@@ -84,7 +81,7 @@ render gs = do
   title <- renderTextSolid (font gs) "Mega Haskell" (Color 255 0 0)
   blitSurface title Nothing s (Just (Rect 510 10 200 400))
 
-  title <- renderTextSolid (font gs) "Tetris Clone" (Color 255 0 0)
+  title <- renderTextSolid (font gs) "Tetris" (Color 255 0 0)
   blitSurface title Nothing s (Just (Rect 515 40 200 40))
   
   paintBlock (blockI !! (rot (block gs)))(block gs) s
