@@ -3,9 +3,9 @@ import Graphics.UI.SDL.TTF as TTF
 
 import Model
 
-dim = 18
+dim = 24
 width = 10
-heght = 22
+height = 22
 leftOffset = 20
 topOffset = 20
 ticksPerStep = 50
@@ -15,12 +15,12 @@ main = do
   setVideoMode 800 600 32 []
   TTF.init
 
-  setCaption "Tetris deluxe" "efefef" 
+  setCaption "Mega Haskell Tetris" "efefef" 
 
   enableKeyRepeat 500 30
 
   fnt <- openFont "font.ttf" 30
-  let fld = [(a, b, 0) | a <- [0..12], b <- [0..21]]--, take 22 (repeat (take 10 (repeat 0))) :: [[Int]]
+  let fld = [(a, b, 0) | a <- [0..12], b <- [0..21]]
   gameLoop (GameState True 0 (Block 4 0 0 0) fnt 0 fld) 
 
 gameLoop :: GameState -> IO ()
@@ -50,9 +50,6 @@ incrementBlock gs =
         in gs {steps = 0, block = b}
    else let b = Block 0 0 0 0
 	    fld = permanentBlock (getBlockPositions gs) (field gs)
-	   -- fld' = addBlocks fld (block gs)
-	   -- fld = (block gs) {} 
-
         in gs {block = b, field = fld, steps = 0 }
 
 permanentBlock :: [(Int, Int, Int)] -> [(Int, Int, Int)] -> [(Int, Int, Int)]
@@ -65,7 +62,7 @@ freezeBlock ((a,b,c):xs) (d,e,f)
   | otherwise = freezeBlock xs (d,e,f)--(d, e, f)
 
 nextIsFree :: GameState -> Bool
-nextIsFree gs = y (block gs) < 5
+nextIsFree gs = legalPosition (x (block gs)) (y (block gs) + 1) gs 
 
 -- stolen code from mr cadr, works nice
 getEvents :: IO Event -> [Event] -> IO [Event]
@@ -80,8 +77,8 @@ getEvents pEvent es = do
 handleEvents :: [Event] -> GameState ->  GameState
 handleEvents [x] gs =
   case x of 
-    KeyDown (Keysym SDLK_RIGHT _ _) -> move 1 gs 
-    KeyDown (Keysym SDLK_LEFT _ _) -> move (-1) gs 
+    KeyDown (Keysym SDLK_RIGHT _ _) -> move 1 0 gs 
+    KeyDown (Keysym SDLK_LEFT _ _) -> move (-1) 0 gs 
     KeyDown (Keysym SDLK_ESCAPE _ _) -> gs { gameActive = False }
     KeyDown (Keysym SDLK_UP _ _) -> gs { block = (block gs) { rot = ((rot (block gs))+ 1) `mod` 2 } }
     KeyDown (Keysym SDLK_DOWN _ _) -> gs {steps = ticksPerStep}
@@ -106,7 +103,6 @@ render gs = do
   blitSurface title Nothing s (Just (Rect 515 40 200 40))
   
   paintBlock (getBlockPositions gs) s
---(map (addPosition (x (block gs)) (y (block gs))) (blockI !! (rot (block gs))) ) s-- (x (block gs), y (block gs)) 1 s
 
   paintField (field gs) s 0
 
@@ -114,18 +110,10 @@ render gs = do
 
 addPosition x y (a, b, c) = (a+x, b+y, c)
 
-getBlockPositions gs = map (addPosition (x (block gs)) (y (block gs))) (blockI !! (rot (block gs))) 
---	paintField :: [(Int, Int, Int)] -> Surface -> Int -> IO()
---	paintField [] _ _ = do return ()
---	paintField ((a, b, c):xs) s height = do
---	  paintBlock [(a, b)] c s 
---	  paintField xs s (height+1)
+getBlockPositions gs = 
+  let b = block gs
+  in map (addPosition (x b) (y b)) (blockI !! (rot b))
 
-	-- paintBlocks :: [Int] -> Surface -> Int -> Int -> IO()
-	-- paintBlocks [] s y x = do return ()
-	-- paintBlocks (x:xs) s y' x' = do
---   if x > 0 then paintBlock [(x', y')] (0, 0) s else return ()
---   paintBlocks xs s y' (x'+1)
 paintField :: [(Int, Int, Int)] -> Surface -> Int -> IO()
 paintField [] _ _ = do return ()
 paintField ((a, b, c):xs) s height = do
@@ -147,13 +135,31 @@ paintSquare (a, b, c) s = do
   return ()
 -- orangeblock <- loadBMP' "data/orangeblock.bmp"
 
-color :: Int -> Int
-color c = 255
+move :: Int -> Int -> GameState -> GameState
+move x' y' gs = 
+  let b' = block gs
+      b = if(legalPosition (x'+ (x b')) (y' + (y b')) gs) then b' {x = (x b') + x', y = (y b') + y' } else b'
+  in  gs {block = b}
+--  where gs' = gs { block = b }
+--       b' = block gs
+--       b = if(legalPosition x' y' gs) then b' {x = (x b') + x, y = (y b') + y' } else b'
 
-move :: Int -> GameState -> GameState
-move d gs = gs'
-  where gs' = gs { block = b}
-        b' = block $ gs
-        b = if(legalPosition (x b' +d) (y b')) then b' {x = (x b') + d } else b'
+legalPosition :: Int -> Int -> GameState -> Bool
+legalPosition x y gs = 
+  let b = block gs
+      transPos = map (addPosition x y) (blockI !! (rot b))
+      res = not $ collission transPos (field gs)
+  in res
 
-legalPosition x y = x >= 0 && x <= 10 
+collission :: [(Int, Int, Int)] -> [(Int, Int, Int)] -> Bool
+collission a b = elem True (map (coll a) b)
+
+coll :: [(Int, Int, Int)] -> (Int, Int, Int) -> Bool
+coll [] b = False
+coll ((a,b,c):xs) (d,e,f)
+  | c /= 0 && a < 0 = True
+  | c /= 0 && a > width = True
+  | a == d && b == e && c /= 0 && f /= 0 = True
+  | b >= height - 1 && c /= 0 = True
+  | otherwise = coll xs (d,e,f)
+
