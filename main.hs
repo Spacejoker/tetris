@@ -1,8 +1,13 @@
 import Graphics.UI.SDL as SDL
 
+data Block = Block {
+	  position :: Int  
+	}
+
 data GameState = GameState{
           gameActive :: Bool,
-          score :: Int
+          score :: Int,
+          block :: Block
         }
 
 main = do
@@ -13,14 +18,15 @@ main = do
 
   enableKeyRepeat 500 30
 
-  gameLoop (GameState True 0) 
+  gameLoop (GameState True 0 (Block 0)) 
 
 gameLoop :: GameState -> IO ()
 gameLoop gs = do
   events <- getEvents pollEvent []
-  putStrLn $ show $ length events
 
   let gs' = handleEvents events gs
+
+  putStrLn $ show $ position $ block $ gs
 
   delay 10 
 
@@ -44,11 +50,20 @@ getEvents pEvent es = do
     else return (reverse es)
 
 -- handle the different types of events
-handleEvents ::(Show a) => [a] -> GameState ->  GameState
-handleEvents [x] gs = gs
-handleEvents (x:xs) gs = 
-  gs { gameActive = False }
+handleEvents :: [Event] -> GameState ->  GameState
+handleEvents [x] gs =
+  case x of 
+    KeyDown (Keysym SDLK_RIGHT _ _) -> move 1 gs 
+    KeyDown (Keysym SDLK_LEFT _ _) -> move (-1) gs 
+    KeyDown (Keysym SDLK_ESCAPE _ _) -> gs { gameActive = False }
+    _ -> gs
+
+handleEvents (x:xs) gs = handleEvents xs (handleEvents [x] gs)
 handleEvents [] gs = gs
 
 
-
+move :: Int -> GameState -> GameState
+move d gs = gs'
+  where gs' = gs { block = b}
+        prevPos = position $ block $ gs
+        b = Block (prevPos + d)
