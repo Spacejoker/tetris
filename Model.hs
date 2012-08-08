@@ -14,7 +14,8 @@ data GameState = GameState{
 	  score :: Int,
 	  block :: Block,
 	  font :: Font,
-	  steps :: Int
+	  steps :: Int,
+	  field :: [[Int]]
         }
 
 blocks = [blockI]
