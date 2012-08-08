@@ -20,7 +20,7 @@ main = do
   enableKeyRepeat 500 30
 
   fnt <- openFont "font.ttf" 30
-  let fld = [(a, b, 0) | a <- [0..9], b <- [0..21]]--, take 22 (repeat (take 10 (repeat 0))) :: [[Int]]
+  let fld = [(a, b, 0) | a <- [0..12], b <- [0..21]]--, take 22 (repeat (take 10 (repeat 0))) :: [[Int]]
   gameLoop (GameState True 0 (Block 4 0 0 0) fnt 0 fld) 
 
 gameLoop :: GameState -> IO ()
@@ -49,11 +49,20 @@ incrementBlock gs =
 	    b = b' {y = ((y b')+1)}
         in gs {steps = 0, block = b}
    else let b = Block 0 0 0 0
-	    fld = field gs
+	    fld = permanentBlock (getBlockPositions gs) (field gs)
 	   -- fld' = addBlocks fld (block gs)
 	   -- fld = (block gs) {} 
 
         in gs {block = b, field = fld, steps = 0 }
+
+permanentBlock :: [(Int, Int, Int)] -> [(Int, Int, Int)] -> [(Int, Int, Int)]
+permanentBlock a b = map (freezeBlock a) b
+
+freezeBlock :: [(Int, Int, Int)] -> (Int, Int, Int) -> (Int, Int, Int)
+freezeBlock [] b = b
+freezeBlock ((a,b,c):xs) (d,e,f)
+  | a== d && b == e && c /= 0 = (a,b,c)
+  | otherwise = freezeBlock xs (d,e,f)--(d, e, f)
 
 nextIsFree :: GameState -> Bool
 nextIsFree gs = y (block gs) < 5
@@ -96,13 +105,16 @@ render gs = do
   title <- renderTextSolid (font gs) "Tetris" (Color 255 0 0)
   blitSurface title Nothing s (Just (Rect 515 40 200 40))
   
-  paintBlock (map (addPosition (x (block gs)) (y (block gs))) (blockI !! (rot (block gs))) ) s-- (x (block gs), y (block gs)) 1 s
+  paintBlock (getBlockPositions gs) s
+--(map (addPosition (x (block gs)) (y (block gs))) (blockI !! (rot (block gs))) ) s-- (x (block gs), y (block gs)) 1 s
 
   paintField (field gs) s 0
 
   SDL.flip s
 
 addPosition x y (a, b, c) = (a+x, b+y, c)
+
+getBlockPositions gs = map (addPosition (x (block gs)) (y (block gs))) (blockI !! (rot (block gs))) 
 --	paintField :: [(Int, Int, Int)] -> Surface -> Int -> IO()
 --	paintField [] _ _ = do return ()
 --	paintField ((a, b, c):xs) s height = do
