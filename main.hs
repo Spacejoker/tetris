@@ -1,7 +1,8 @@
 import Graphics.UI.SDL as SDL
 
 data Block = Block {
-	  position :: Int  
+	  x :: Int,
+	  y :: Int
 	}
 
 data GameState = GameState{
@@ -18,7 +19,7 @@ main = do
 
   enableKeyRepeat 500 30
 
-  gameLoop (GameState True 0 (Block 0)) 
+  gameLoop (GameState True 0 (Block 4 0)) 
 
 gameLoop :: GameState -> IO ()
 gameLoop gs = do
@@ -26,7 +27,7 @@ gameLoop gs = do
 
   let gs' = handleEvents events gs
 
-  putStrLn $ show $ position $ block $ gs
+  putStrLn $ show $ x $ block $ gs
 
   delay 10 
 
@@ -65,5 +66,7 @@ handleEvents [] gs = gs
 move :: Int -> GameState -> GameState
 move d gs = gs'
   where gs' = gs { block = b}
-        prevPos = position $ block $ gs
-        b = Block (prevPos + d)
+        b' = block $ gs
+        b = if(legalPosition ((x b' +d)) (y b')) then Block ((x b') + d) (y b') else b'
+
+legalPosition x y = True
