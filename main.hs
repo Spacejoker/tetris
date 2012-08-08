@@ -16,7 +16,7 @@ main = do
   gameLoop (GameState True 0) 
 
 gameLoop :: GameState -> IO ()
-gameLoop gs cnt = do
+gameLoop gs = do
   events <- getEvents pollEvent []
   putStrLn $ show $ length events
 
@@ -24,15 +24,15 @@ gameLoop gs cnt = do
 
   delay 10 
 
-  render gs'
+--  render gs'
  
   if (gameActive gs')
     then gameLoop  gs' 
-    else quit
+    else quit'
 
 
-quit :: IO ()
-quit = return ()
+quit' :: IO ()
+quit' = return ()
 
 -- stolen code from mr cadr, works nice
 getEvents :: IO Event -> [Event] -> IO [Event]
