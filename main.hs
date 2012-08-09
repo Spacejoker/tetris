@@ -2,6 +2,7 @@ import Graphics.UI.SDL as SDL
 import Graphics.UI.SDL.TTF as TTF
 
 import System.Random
+import Data.Time.Clock
 
 import Model
 
@@ -20,8 +21,9 @@ main = do
   setCaption "Mega Haskell Tetris" "efefef" 
 
   enableKeyRepeat 500 30
-
-  let (randomValue, newGenerator) = randomR (0, 6) (mkStdGen 900) 
+ 
+  stdGen <- getStdGen 
+  let (randomValue, newGenerator) = randomR (0, 6) (stdGen) 
 
   fnt <- openFont "font.ttf" 30
   let fld = [(a, b, 0) | a <- [0..12], b <- [0..21]]
