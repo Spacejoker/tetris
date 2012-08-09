@@ -21,7 +21,7 @@ main = do
 
   fnt <- openFont "font.ttf" 30
   let fld = [(a, b, 0) | a <- [0..12], b <- [0..21]]
-  gameLoop (GameState True 0 (Block 4 0 0 1) fnt 0 fld) 
+  gameLoop (GameState True 0 (Block 4 0 0 2) fnt 0 fld) 
 
 gameLoop :: GameState -> IO ()
 gameLoop gs = do
