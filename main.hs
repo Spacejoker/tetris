@@ -64,7 +64,12 @@ incrementBlock gs =
         in gs {block = b, field = fld, steps = 0, gen = gen' }
 
 permanentBlock :: [(Int, Int, Int)] -> [(Int, Int, Int)] -> [(Int, Int, Int)]
-permanentBlock a b = map (freezeBlock a) b
+permanentBlock a b = clearFullLines (map (freezeBlock a) b)
+
+-- countElementPerLine :: [(Int, Int, Int)] -> [Int]
+-- countElementPerLine [] = take height (repeat 0)
+-- countElementPerLine ((a,b,c):s) =  
+
 
 freezeBlock :: [(Int, Int, Int)] -> (Int, Int, Int) -> (Int, Int, Int)
 freezeBlock [] b = b
