@@ -1,6 +1,8 @@
 import Graphics.UI.SDL as SDL
 import Graphics.UI.SDL.TTF as TTF
 
+import System.Random
+
 import Model
 
 dim = 24
@@ -19,9 +21,11 @@ main = do
 
   enableKeyRepeat 500 30
 
+  let (randomValue, newGenerator) = randomR (0, 6) (mkStdGen 900) 
+
   fnt <- openFont "font.ttf" 30
   let fld = [(a, b, 0) | a <- [0..12], b <- [0..21]]
-  gameLoop (GameState True 0 (Block 4 0 0 2) fnt 0 fld) 
+  gameLoop (GameState True 0 (Block 4 0 0 randomValue) fnt 0 fld newGenerator) 
 
 gameLoop :: GameState -> IO ()
 gameLoop gs = do
@@ -42,15 +46,20 @@ tick gs
   | steps gs > ticksPerStep = incrementBlock gs 
   | otherwise = gs {steps = (steps gs) + 1}
 
+pieceR :: StdGen -> (Int, StdGen)
+pieceR gen = randomR (0,6) gen
+
 incrementBlock :: GameState -> GameState
 incrementBlock gs =
  if (nextIsFree gs) 
    then let b' = block gs
 	    b = b' {y = ((y b')+1)}
         in gs {steps = 0, block = b}
-   else let b = Block 0 0 0 0
+   else let 
+	    (val, gen') = pieceR (gen gs)
+	    b = Block 0 0 0 val 
 	    fld = permanentBlock (getBlockPositions gs) (field gs)
-        in gs {block = b, field = fld, steps = 0 }
+        in gs {block = b, field = fld, steps = 0, gen = gen' }
 
 permanentBlock :: [(Int, Int, Int)] -> [(Int, Int, Int)] -> [(Int, Int, Int)]
 permanentBlock a b = map (freezeBlock a) b

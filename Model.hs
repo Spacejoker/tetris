@@ -3,6 +3,8 @@ module Model where
 import Graphics.UI.SDL as SDL
 import Graphics.UI.SDL.TTF as TTF
 
+import System.Random
+
 data Block = Block {
 	  x :: Int,
 	  y :: Int,
@@ -16,7 +18,8 @@ data GameState = GameState{
 	  block :: Block,
 	  font :: Font,
 	  steps :: Int,
-	  field :: [(Int, Int, Int)] -- (x, y, value)
+	  field :: [(Int, Int, Int)],
+	  gen :: StdGen
         }
 
 blocks = [blockI, blockJ, blockT, blockO, blockZ, blockS, blockL]
