@@ -21,7 +21,7 @@ main = do
 
   fnt <- openFont "font.ttf" 30
   let fld = [(a, b, 0) | a <- [0..12], b <- [0..21]]
-  gameLoop (GameState True 0 (Block 4 0 0 0) fnt 0 fld) 
+  gameLoop (GameState True 0 (Block 4 0 0 1) fnt 0 fld) 
 
 gameLoop :: GameState -> IO ()
 gameLoop gs = do
@@ -80,7 +80,7 @@ handleEvents [x] gs =
     KeyDown (Keysym SDLK_RIGHT _ _) -> move 1 0 gs 
     KeyDown (Keysym SDLK_LEFT _ _) -> move (-1) 0 gs 
     KeyDown (Keysym SDLK_ESCAPE _ _) -> gs { gameActive = False }
-    KeyDown (Keysym SDLK_UP _ _) -> gs { block = (block gs) { rot = ((rot (block gs))+ 1) `mod` 2 } }
+    KeyDown (Keysym SDLK_UP _ _) -> gs { block = (block gs) { rot = ((rot (block gs))+ 1) `mod` (length (blocks !! (blockId (block gs)))) } }
     KeyDown (Keysym SDLK_DOWN _ _) -> gs {steps = ticksPerStep}
     _ -> gs
 
@@ -112,7 +112,8 @@ addPosition x y (a, b, c) = (a+x, b+y, c)
 
 getBlockPositions gs = 
   let b = block gs
-  in map (addPosition (x b) (y b)) (blockI !! (rot b))
+      curBlock = blocks !! (blockId b)
+  in map (addPosition (x b) (y b)) (curBlock  !! (rot b))
 
 paintField :: [(Int, Int, Int)] -> Surface -> Int -> IO()
 paintField [] _ _ = do return ()
@@ -147,7 +148,8 @@ move x' y' gs =
 legalPosition :: Int -> Int -> GameState -> Bool
 legalPosition x y gs = 
   let b = block gs
-      transPos = map (addPosition x y) (blockI !! (rot b))
+      curBlock = blocks !! (blockId b)
+      transPos = map (addPosition x y) (curBlock !! (rot b))
       res = not $ collission transPos (field gs)
   in res
 
