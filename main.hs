@@ -25,6 +25,8 @@ main = do
   stdGen <- getStdGen 
   let (randomValue, newGenerator) = randomR (0, 6) (stdGen) 
 
+  putStrLn $show ((incrementElement 2 1 [0,0,0,0,0,0])) 
+
   fnt <- openFont "font.ttf" 30
   let fld = [(a, b, 0) | a <- [0..12], b <- [0..21]]
   gameLoop (GameState True 0 (Block 4 0 0 randomValue) fnt 0 fld newGenerator) 
@@ -70,18 +72,27 @@ clearDone ::[(Int, Int, Int)] -> [(Int, Int, Int)]
 clearDone fld =
   let cnt = countElementPerLine fld
       rmLines = fullLines 0 cnt
-      fld' = clearLines fld cnt
-  in fld'
+      fld' = clearLines fld rmLines
+      in fld'
+
+-- shiftLines [] _ = []
+-- shiftLins ((a,b,c):xs) rmLines = ((a, b + (greaterCnt b rmLines), xs))  
+
+-- greaterCnt _ [] = 0
+-- greaterCnt i (x:xs) =
+--   case i
 
 fullLines :: Int -> [Int] -> [Int]
 fullLines _ [] = []
 fullLines curLine (x : xs) =
-  case x == width of
+  case x >= width of
     True -> (curLine : fullLines (curLine +1)  xs)
     otherwise -> fullLines (curLine+1) xs
 
 clearLines :: [(Int, Int, Int)] -> [Int] -> [(Int, Int, Int)]
-clearLines ( (a, b, c) : xs) rmLines  
+clearLines [] _ = []
+clearLines ( (a, b, c) : xs) rmLines 
+--  | length rmLines > 0 = ((a,b,0) : clearLines xs rmLines)
   | elem b rmLines = ((a,b,0) : clearLines xs rmLines)
   | otherwise = ((a,b,c):clearLines xs rmLines)
 
@@ -94,11 +105,9 @@ countElementPerLine ((a,b,c):s) =
 
 incrementElement :: Int -> Int -> [Int] -> [Int]
 incrementElement a b [] = []
-incrementElement n amt (x:xs) = 
-  case n of
-    0 -> (x + amt: xs)
-    _ -> incrementElement (n-1) amt xs
-
+incrementElement a b (x:xs)
+    | a == 0 = (x + b: xs)
+    | otherwise =  (x : incrementElement (a-1) b xs)
 
 freezeBlock :: [(Int, Int, Int)] -> (Int, Int, Int) -> (Int, Int, Int)
 freezeBlock [] b = b
