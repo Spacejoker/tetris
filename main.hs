@@ -64,11 +64,40 @@ incrementBlock gs =
         in gs {block = b, field = fld, steps = 0, gen = gen' }
 
 permanentBlock :: [(Int, Int, Int)] -> [(Int, Int, Int)] -> [(Int, Int, Int)]
-permanentBlock a b = map (freezeBlock a) b
+permanentBlock a b = clearDone (map (freezeBlock a) b)
 
--- countElementPerLine :: [(Int, Int, Int)] -> [Int]
--- countElementPerLine [] = take height (repeat 0)
--- countElementPerLine ((a,b,c):s) =  
+clearDone ::[(Int, Int, Int)] -> [(Int, Int, Int)]
+clearDone fld =
+  let cnt = countElementPerLine fld
+      rmLines = fullLines 0 cnt
+      fld' = clearLines fld cnt
+  in fld'
+
+fullLines :: Int -> [Int] -> [Int]
+fullLines _ [] = []
+fullLines curLine (x : xs) =
+  case x == width of
+    True -> (curLine : fullLines (curLine +1)  xs)
+    otherwise -> fullLines (curLine+1) xs
+
+clearLines :: [(Int, Int, Int)] -> [Int] -> [(Int, Int, Int)]
+clearLines ( (a, b, c) : xs) rmLines  
+  | elem b rmLines = ((a,b,0) : clearLines xs rmLines)
+  | otherwise = ((a,b,c):clearLines xs rmLines)
+
+countElementPerLine :: [(Int, Int, Int)] -> [Int]
+countElementPerLine [] = take height (repeat 0)
+countElementPerLine ((a,b,c):s) =  
+  case c of
+    0 -> countElementPerLine s
+    _ -> incrementElement b 1 (countElementPerLine s)
+
+incrementElement :: Int -> Int -> [Int] -> [Int]
+incrementElement a b [] = []
+incrementElement n amt (x:xs) = 
+  case n of
+    0 -> (x + amt: xs)
+    _ -> incrementElement (n-1) amt xs
 
 
 freezeBlock :: [(Int, Int, Int)] -> (Int, Int, Int) -> (Int, Int, Int)
