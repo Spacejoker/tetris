@@ -53,7 +53,7 @@ pieceR gen = randomR (0,6) gen
 
 incrementBlock :: GameState -> GameState
 incrementBlock gs =
- if (nextIsFree gs) 
+ if (nextIsFree gs (0,1)) 
    then let b' = block gs
 	    b = b' {y = ((y b')+1)}
         in gs {steps = 0, block = b}
@@ -64,7 +64,7 @@ incrementBlock gs =
         in gs {block = b, field = fld, steps = 0, gen = gen' }
 
 permanentBlock :: [(Int, Int, Int)] -> [(Int, Int, Int)] -> [(Int, Int, Int)]
-permanentBlock a b = clearFullLines (map (freezeBlock a) b)
+permanentBlock a b = map (freezeBlock a) b
 
 -- countElementPerLine :: [(Int, Int, Int)] -> [Int]
 -- countElementPerLine [] = take height (repeat 0)
@@ -77,8 +77,8 @@ freezeBlock ((a,b,c):xs) (d,e,f)
   | a== d && b == e && c /= 0 = (a,b,c)
   | otherwise = freezeBlock xs (d,e,f)--(d, e, f)
 
-nextIsFree :: GameState -> Bool
-nextIsFree gs = legalPosition (x (block gs)) (y (block gs) + 1) gs 
+nextIsFree :: GameState -> (Int, Int)-> Bool
+nextIsFree gs change = legalPosition (x (block gs) + (fst change)) (y (block gs) + (snd change)) gs 
 
 -- stolen code from mr cadr, works nice
 getEvents :: IO Event -> [Event] -> IO [Event]
@@ -96,12 +96,19 @@ handleEvents [x] gs =
     KeyDown (Keysym SDLK_RIGHT _ _) -> move 1 0 gs 
     KeyDown (Keysym SDLK_LEFT _ _) -> move (-1) 0 gs 
     KeyDown (Keysym SDLK_ESCAPE _ _) -> gs { gameActive = False }
-    KeyDown (Keysym SDLK_UP _ _) -> gs { block = (block gs) { rot = ((rot (block gs))+ 1) `mod` (length (blocks !! (blockId (block gs)))) } }
+    KeyDown (Keysym SDLK_UP _ _) -> rotate gs 
     KeyDown (Keysym SDLK_DOWN _ _) -> gs {steps = ticksPerStep}
     _ -> gs
-
 handleEvents (x:xs) gs = handleEvents xs (handleEvents [x] gs)
 handleEvents [] gs = gs
+
+rotate :: GameState -> GameState
+rotate gs = 
+  let  rot' = ((rot (block gs))+ 1) `mod` (length (blocks !! (blockId (block gs))))  
+       block' = (block gs) { rot = rot' } 
+  in case nextIsFree gs{block = block'} (0,0) of
+              False -> gs
+              otherwise -> gs { block = block'} 
 
 render :: GameState -> IO ()
 render gs = do 
