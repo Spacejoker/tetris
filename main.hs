@@ -221,7 +221,7 @@ coll :: [(Int, Int, Int)] -> (Int, Int, Int) -> Bool
 coll [] b = False
 coll ((a,b,c):xs) (d,e,f)
   | c /= 0 && a < 0 = True
-  | c /= 0 && a > width = True
+  | c /= 0 && a >= width = True
   | a == d && b == e && c /= 0 && f /= 0 = True
   | b >= height - 1 && c /= 0 = True
   | otherwise = coll xs (d,e,f)
