@@ -167,9 +167,9 @@ render gs = do
   title <- renderTextSolid (font gs) "Tetris" (Color 255 0 0)
   blitSurface title Nothing s (Just (Rect 515 40 200 40))
   
-  paintBlock (getBlockPositions gs) s
+  paintField (getBlockPositions gs) s
 
-  paintField (field gs) s 0
+  paintField (field gs) s 
 
   SDL.flip s
 
@@ -180,24 +180,17 @@ getBlockPositions gs =
       curBlock = blocks !! (blockId b)
   in map (addPosition (x b) (y b)) (curBlock  !! (rot b))
 
-paintField :: [Blk] -> Surface -> Int -> IO()
-paintField [] _ _ = do return ()
-paintField (x:xs) s height = do
-  paintBlock [x] s 
-  paintField xs s (height+1)
+paintField :: [Blk] -> Surface -> IO()
+paintField [] _  = do return ()
+paintField (x:xs) s = do
+  paintSquare x s 
+  paintField xs s 
 
-paintBlock :: [Blk] -> Surface -> IO()
-paintBlock [] s = return ()
-paintBlock (x:xs) s= do
-  paintSquare x s
-  paintBlock xs s
-
-paintSquare :: Blk -> Surface -> IO()
+paintSquare :: Blk -> Surface -> IO Bool
 paintSquare blk s = do
   let x' = (fst (pos blk)) * dim + leftOffset
   let y' = (snd (pos blk)) * dim + topOffset
   fillRect s (Just (Rect x' y' dim dim)) (Pixel 255) 
-  return ()
 -- orangeblock <- loadBMP' "data/orangeblock.bmp"
 
 move :: Int -> Int -> GameState -> GameState
@@ -205,9 +198,6 @@ move x' y' gs =
   let b' = block gs
       b = if(legalPosition (x'+ (x b')) (y' + (y b')) gs) then b' {x = (x b') + x', y = (y b') + y' } else b'
   in  gs {block = b}
---  where gs' = gs { block = b }
---       b' = block gs
---       b = if(legalPosition x' y' gs) then b' {x = (x b') + x, y = (y b') + y' } else b'
 
 legalPosition :: Int -> Int -> GameState -> Bool
 legalPosition x y gs = 
@@ -218,14 +208,15 @@ legalPosition x y gs =
   in res
 
 collission :: [Blk] -> [Blk] -> Bool
-collission a b = elem True (map (coll a) b)
+collission a b = elem True (map (coll b) a)
 
 coll :: [Blk] -> Blk -> Bool
-coll [] b = False
-coll (Blk (a,b) _ :xs) (Blk (d,e) _)
+coll [] (Blk (a,b) f)
+  | b >= height -1 = True
   | a < 0 = True
   | a >= width = True
+  | otherwise = False
+coll (Blk (a,b) _ :xs) (Blk (d,e) f)
   | a == d && b == e = True
-  | b >= height - 1 = True
-  | otherwise = coll xs (Blk (d,e) Blue)
+  | otherwise = coll xs (Blk (d,e) f)
 
