@@ -25,12 +25,10 @@ main = do
   stdGen <- getStdGen 
   let (randomValue, newGenerator) = randomR (0, 6) (stdGen) 
 
-  --putStrLn $show ((incrementElement 2 1 [0,0,0,0,0,0])) 
-
   fnt <- openFont "font.ttf" 30
---  let fld = []--(a, b, 0) | a <- [0..12], b <- [0..21]]
   gameLoop (GameState True 0 (Block 4 0 0 randomValue) fnt 0 [] newGenerator) 
 
+-- Main loop, one cycle per paint and logic tick
 gameLoop :: GameState -> IO ()
 gameLoop gs = do
   events <- getEvents pollEvent []
@@ -53,6 +51,7 @@ tick gs
 pieceR :: StdGen -> (Int, StdGen)
 pieceR gen = randomR (0,6) gen
 
+-- drop the active block once downwards
 incrementBlock :: GameState -> GameState
 incrementBlock gs =
  if (nextIsFree gs (0,1)) 
@@ -64,6 +63,9 @@ incrementBlock gs =
 	    b = Block 0 0 0 val 
 	    fld = permanentBlock (getBlockPositions gs) (field gs)
         in gs {block = b, field = fld, steps = 0, gen = gen' }
+
+nextIsFree :: GameState -> (Int, Int)-> Bool
+nextIsFree gs change = legalPosition (x (block gs) + (fst change)) (y (block gs) + (snd change)) gs 
 
 makeBlks :: [(Int, Int)] -> Clr -> [Blk]
 makeBlks [x] clr = [Blk x clr]
@@ -100,7 +102,6 @@ clearLines ( Blk (a,b) z : xs) rmLines
 
 countElementPerLine :: [Blk] -> [Int]
 countElementPerLine [] = take height (repeat 0)
---countElementPerLine (x:xs) = countElementPerLine xs
 countElementPerLine (Blk (a,b) _:s) =incrementElement b 1 (countElementPerLine s)
 
 incrementElement :: Int -> Int -> [Int] -> [Int]
@@ -112,12 +113,6 @@ incrementElement a b (x:xs)
 merge :: [Blk] -> [Blk] -> [Blk]
 merge [] other = other
 merge (x:xs) other = x:merge xs other
--- freezeBlock ((a,b,c):xs) (d,e,f)
---  | a== d && b == e && c /= 0 = (a,b,c)
---  | otherwise = freezeBlock xs (d,e,f)--(d, e, f)
-
-nextIsFree :: GameState -> (Int, Int)-> Bool
-nextIsFree gs change = legalPosition (x (block gs) + (fst change)) (y (block gs) + (snd change)) gs 
 
 -- stolen code from mr cadr, works nice
 getEvents :: IO Event -> [Event] -> IO [Event]
