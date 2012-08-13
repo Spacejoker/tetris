@@ -76,13 +76,14 @@ clearDone ::[Blk] -> [Blk]
 clearDone fld =
   let cnt = countElementPerLine fld
       rmLines = fullLines 0 cnt
---      fld' = clearLines fld rmLines
---      fld'' = shiftLines fld' rmLines
---      in fld''
-      in fld
+      fld' = clearLines fld rmLines
+      fld'' = shiftLines fld' rmLines
+      in fld''
 
 shiftLines [] _ = []
-shiftLines ((a,b,c):xs) lst = ((a-1, b - 1, c-1):xs)
+shiftLines (Blk (a,b) c:xs) lst =
+  let nrShifts = length $ filter (>b) lst
+  in (Blk (a, b +nrShifts) c:shiftLines xs lst)
 
 fullLines :: Int -> [Int] -> [Int]
 fullLines _ [] = []
@@ -94,23 +95,19 @@ fullLines curLine (x : xs) =
 clearLines :: [Blk] -> [Int] -> [Blk]
 clearLines [] _ = []
 clearLines ( Blk (a,b) z : xs) rmLines 
---  | length rmLines > 0 = ((a,b,0) : clearLines xs rmLines)
   | elem b rmLines = clearLines xs rmLines
   | otherwise = (Blk (a,b) z:clearLines xs rmLines)
 
 countElementPerLine :: [Blk] -> [Int]
 countElementPerLine [] = take height (repeat 0)
-countElementPerLine (x:xs) = countElementPerLine xs
---countElementPerLine ((a,b,c):s) =  
---  case c of
---    0 -> countElementPerLine s
---    _ -> incrementElement b 1 (countElementPerLine s)
---
---incrementElement :: Int -> Int -> [Int] -> [Int]
---incrementElement a b [] = []
---incrementElement a b (x:xs)
---    | a == 0 = (x + b: xs)
---    | otherwise =  (x : incrementElement (a-1) b xs)
+--countElementPerLine (x:xs) = countElementPerLine xs
+countElementPerLine (Blk (a,b) _:s) =incrementElement b 1 (countElementPerLine s)
+
+incrementElement :: Int -> Int -> [Int] -> [Int]
+incrementElement a b [] = []
+incrementElement a b (x:xs)
+    | a == 0 = (x + b: xs)
+    | otherwise =  (x : incrementElement (a-1) b xs)
 
 merge :: [Blk] -> [Blk] -> [Blk]
 merge [] other = other
@@ -141,6 +138,7 @@ handleEvents [x] gs =
     KeyDown (Keysym SDLK_UP _ _) -> rotate gs 
     KeyDown (Keysym SDLK_DOWN _ _) -> gs {steps = ticksPerStep}
     _ -> gs
+
 handleEvents (x:xs) gs = handleEvents xs (handleEvents [x] gs)
 handleEvents [] gs = gs
 
