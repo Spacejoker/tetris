@@ -18,19 +18,26 @@ data GameState = GameState{
 	  block :: Block,
 	  font :: Font,
 	  steps :: Int,
-	  field :: [(Int, Int, Int)],
+	  field :: [Blk],
 	  gen :: StdGen
         }
 
+data Clr = Blue | Red
+
+data Blk = Blk {
+	  pos :: (Int, Int),
+	  color :: Clr
+	}
+
 blocks = [blockI, blockJ, blockT, blockO, blockZ, blockS, blockL]
 
-blockO = [[(1,1,1),(2,1,1),(2,2,1),(1,2,1)]] :: [[(Int, Int, Int)]]
-blockI = [[(2,0,1),(2,1,1),(2,2,1),(2,3,1)],[(0,1,1),(1,1,1),(2,1,1),(3,1,1)]] :: [[(Int, Int, Int)]]
-blockS = [[(1,2,1),(2,1,1),(2,2,1),(3,1,1)],[(2,0,1),(2,1,1),(3,1,1),(3,2,1)]] :: [[(Int, Int, Int)]]
-blockZ = [[(1,1,1),(2,1,1),(2,2,1),(3,2,1)],[(3,0,1),(2,1,1),(3,1,1),(2,2,1)]] :: [[(Int, Int, Int)]]
-blockL = [[(1,1,3),(1,2,3),(2,1,3),(3,1,3)],[(2,0,3),(3,2,3),(2,1,3),(2,2,3)],[(3,0,3),(1,1,3),(2,1,3),(3,1,3)],[(2,0,3),(2,1,3),(2,2,3),(1,0,3)]] :: [[(Int, Int, Int)]]
-blockJ = [[(2,0,2),(2,1,2),(2,2,2),(1,2,2)],[(1,1,2),(2,1,2),(3,1,2),(3,2,2)],[(2,0,2),(3,0,2),(2,1,2),(2,2,2)],[(1,0,2),(1,1,2),(2,1,2),(3,1,2)]] :: [[(Int, Int, Int)]]
-blockT = [[(1,1,2),(2,1,2),(3,1,2),(2,2,2)],[(2,0,2),(2,1,2),(2,2,2),(3,1,2)],[(1,1,2),(2,1,2),(3,1,2),(2,0,2)],[(1,1,2),(2,1,2),(2,0,2),(2,2,2)]] :: [[(Int, Int, Int)]]
+blockO = [[Blk (1,1) Red, Blk (2,1) Red ,Blk (2,2) Red ,Blk (1,2) Red ]] :: [[Blk]]
+blockI = [[Blk (2,0) Red ,Blk (2,1) Red ,Blk (2,2) Red ,Blk (2,3) Red ],[Blk (0,1) Red ,Blk (1,1) Red ,Blk (2,1) Red ,Blk (3,1) Red ]] :: [[Blk]]
+blockS = [[Blk (1,2) Red ,Blk (2,1) Red ,Blk (2,2) Red ,Blk (3,1) Red ],[Blk (2,0) Red ,Blk (2,1) Red ,Blk (3,1) Red ,Blk (3,2) Red ]] :: [[Blk]]
+blockZ = [[Blk (1,1) Red ,Blk (2,1) Red ,Blk (2,2) Red ,Blk (3,2) Red ],[Blk (3,0) Red ,Blk (2,1) Red ,Blk (3,1) Red ,Blk (2,2) Red ]] :: [[Blk]]
+blockL = [[Blk (1,1) Red ,Blk (1,2) Red ,Blk (2,1) Red ,Blk (3,1) Red ],[Blk (2,0) Red ,Blk (3,2) Red ,Blk (2,1) Red ,Blk (2,2) Red ],[Blk (3,0) Red ,Blk (1,1) Red ,Blk (2,1) Red ,Blk (3,1) Red ],[Blk (2,0) Red ,Blk (2,1) Red ,Blk (2,2) Red ,Blk (1,0) Red ]] :: [[Blk]]
+blockJ = [[Blk (2,0) Red ,Blk (2,1) Red ,Blk (2,2) Red ,Blk (1,2) Red ],[Blk (1,1) Red ,Blk (2,1) Red ,Blk (3,1) Red ,Blk (3,2) Red ],[Blk (2,0) Red ,Blk (3,0) Red ,Blk (2,1) Red ,Blk (2,2) Red ],[Blk (1,0) Red ,Blk (1,1) Red ,Blk (2,1) Red ,Blk (3,1) Red ]] :: [[Blk]]
+blockT = [[Blk (1,1) Red ,Blk (2,1) Red ,Blk (3,1) Red ,Blk (2,2) Red ],[Blk (2,0) Red ,Blk (2,1) Red ,Blk (2,2) Red ,Blk (3,1) Red ],[Blk (1,1) Red ,Blk (2,1) Red ,Blk (3,1) Red ,Blk (2,0) Red ],[Blk (1,1) Red ,Blk (2,1) Red ,Blk (2,0) Red ,Blk (2,2) Red ]] :: [[Blk]]
 
 
 

@@ -25,11 +25,11 @@ main = do
   stdGen <- getStdGen 
   let (randomValue, newGenerator) = randomR (0, 6) (stdGen) 
 
-  putStrLn $show ((incrementElement 2 1 [0,0,0,0,0,0])) 
+  --putStrLn $show ((incrementElement 2 1 [0,0,0,0,0,0])) 
 
   fnt <- openFont "font.ttf" 30
-  let fld = [(a, b, 0) | a <- [0..12], b <- [0..21]]
-  gameLoop (GameState True 0 (Block 4 0 0 randomValue) fnt 0 fld newGenerator) 
+--  let fld = []--(a, b, 0) | a <- [0..12], b <- [0..21]]
+  gameLoop (GameState True 0 (Block 4 0 0 randomValue) fnt 0 [] newGenerator) 
 
 gameLoop :: GameState -> IO ()
 gameLoop gs = do
@@ -65,22 +65,24 @@ incrementBlock gs =
 	    fld = permanentBlock (getBlockPositions gs) (field gs)
         in gs {block = b, field = fld, steps = 0, gen = gen' }
 
-permanentBlock :: [(Int, Int, Int)] -> [(Int, Int, Int)] -> [(Int, Int, Int)]
-permanentBlock a b = clearDone (map (freezeBlock a) b)
+makeBlks :: [(Int, Int)] -> Clr -> [Blk]
+makeBlks [x] clr = [Blk x clr]
+makeBlks (x:xs) clr = Blk x clr: makeBlks xs clr
 
-clearDone ::[(Int, Int, Int)] -> [(Int, Int, Int)]
+permanentBlock :: [Blk] -> [Blk] -> [Blk]
+permanentBlock a b = clearDone (merge a b)
+
+clearDone ::[Blk] -> [Blk]
 clearDone fld =
   let cnt = countElementPerLine fld
       rmLines = fullLines 0 cnt
-      fld' = clearLines fld rmLines
-      in fld'
+--      fld' = clearLines fld rmLines
+--      fld'' = shiftLines fld' rmLines
+--      in fld''
+      in fld
 
--- shiftLines [] _ = []
--- shiftLins ((a,b,c):xs) rmLines = ((a, b + (greaterCnt b rmLines), xs))  
-
--- greaterCnt _ [] = 0
--- greaterCnt i (x:xs) =
---   case i
+shiftLines [] _ = []
+shiftLines ((a,b,c):xs) lst = ((a-1, b - 1, c-1):xs)
 
 fullLines :: Int -> [Int] -> [Int]
 fullLines _ [] = []
@@ -89,31 +91,33 @@ fullLines curLine (x : xs) =
     True -> (curLine : fullLines (curLine +1)  xs)
     otherwise -> fullLines (curLine+1) xs
 
-clearLines :: [(Int, Int, Int)] -> [Int] -> [(Int, Int, Int)]
+clearLines :: [Blk] -> [Int] -> [Blk]
 clearLines [] _ = []
-clearLines ( (a, b, c) : xs) rmLines 
+clearLines ( Blk (a,b) z : xs) rmLines 
 --  | length rmLines > 0 = ((a,b,0) : clearLines xs rmLines)
-  | elem b rmLines = ((a,b,0) : clearLines xs rmLines)
-  | otherwise = ((a,b,c):clearLines xs rmLines)
+  | elem b rmLines = clearLines xs rmLines
+  | otherwise = (Blk (a,b) z:clearLines xs rmLines)
 
-countElementPerLine :: [(Int, Int, Int)] -> [Int]
+countElementPerLine :: [Blk] -> [Int]
 countElementPerLine [] = take height (repeat 0)
-countElementPerLine ((a,b,c):s) =  
-  case c of
-    0 -> countElementPerLine s
-    _ -> incrementElement b 1 (countElementPerLine s)
+countElementPerLine (x:xs) = countElementPerLine xs
+--countElementPerLine ((a,b,c):s) =  
+--  case c of
+--    0 -> countElementPerLine s
+--    _ -> incrementElement b 1 (countElementPerLine s)
+--
+--incrementElement :: Int -> Int -> [Int] -> [Int]
+--incrementElement a b [] = []
+--incrementElement a b (x:xs)
+--    | a == 0 = (x + b: xs)
+--    | otherwise =  (x : incrementElement (a-1) b xs)
 
-incrementElement :: Int -> Int -> [Int] -> [Int]
-incrementElement a b [] = []
-incrementElement a b (x:xs)
-    | a == 0 = (x + b: xs)
-    | otherwise =  (x : incrementElement (a-1) b xs)
-
-freezeBlock :: [(Int, Int, Int)] -> (Int, Int, Int) -> (Int, Int, Int)
-freezeBlock [] b = b
-freezeBlock ((a,b,c):xs) (d,e,f)
-  | a== d && b == e && c /= 0 = (a,b,c)
-  | otherwise = freezeBlock xs (d,e,f)--(d, e, f)
+merge :: [Blk] -> [Blk] -> [Blk]
+merge [] other = other
+merge (x:xs) other = x:merge xs other
+-- freezeBlock ((a,b,c):xs) (d,e,f)
+--  | a== d && b == e && c /= 0 = (a,b,c)
+--  | otherwise = freezeBlock xs (d,e,f)--(d, e, f)
 
 nextIsFree :: GameState -> (Int, Int)-> Bool
 nextIsFree gs change = legalPosition (x (block gs) + (fst change)) (y (block gs) + (snd change)) gs 
@@ -169,31 +173,30 @@ render gs = do
 
   SDL.flip s
 
-addPosition x y (a, b, c) = (a+x, b+y, c)
+addPosition x y (Blk (a,b) clr) = Blk (a+x, b+y) clr
 
 getBlockPositions gs = 
   let b = block gs
       curBlock = blocks !! (blockId b)
   in map (addPosition (x b) (y b)) (curBlock  !! (rot b))
 
-paintField :: [(Int, Int, Int)] -> Surface -> Int -> IO()
+paintField :: [Blk] -> Surface -> Int -> IO()
 paintField [] _ _ = do return ()
-paintField ((a, b, c):xs) s height = do
-  paintBlock [(a, b, c)] s 
+paintField (x:xs) s height = do
+  paintBlock [x] s 
   paintField xs s (height+1)
 
-paintBlock :: [(Int, Int, Int)] -> Surface -> IO()
-paintBlock [x] s = do 
-  paintSquare x s
+paintBlock :: [Blk] -> Surface -> IO()
+paintBlock [] s = return ()
 paintBlock (x:xs) s= do
   paintSquare x s
   paintBlock xs s
 
-paintSquare :: (Int, Int, Int) -> Surface -> IO()
-paintSquare (a, b, c) s = do
-  let x' = a * dim + leftOffset
-  let y' = b * dim + topOffset
-  if c > 0 then fillRect s (Just (Rect x' y' dim dim)) (Pixel 255) else return True 
+paintSquare :: Blk -> Surface -> IO()
+paintSquare blk s = do
+  let x' = (fst (pos blk)) * dim + leftOffset
+  let y' = (snd (pos blk)) * dim + topOffset
+  fillRect s (Just (Rect x' y' dim dim)) (Pixel 255) 
   return ()
 -- orangeblock <- loadBMP' "data/orangeblock.bmp"
 
@@ -214,15 +217,15 @@ legalPosition x y gs =
       res = not $ collission transPos (field gs)
   in res
 
-collission :: [(Int, Int, Int)] -> [(Int, Int, Int)] -> Bool
+collission :: [Blk] -> [Blk] -> Bool
 collission a b = elem True (map (coll a) b)
 
-coll :: [(Int, Int, Int)] -> (Int, Int, Int) -> Bool
+coll :: [Blk] -> Blk -> Bool
 coll [] b = False
-coll ((a,b,c):xs) (d,e,f)
-  | c /= 0 && a < 0 = True
-  | c /= 0 && a >= width = True
-  | a == d && b == e && c /= 0 && f /= 0 = True
-  | b >= height - 1 && c /= 0 = True
-  | otherwise = coll xs (d,e,f)
+coll (Blk (a,b) _ :xs) (Blk (d,e) _)
+  | a < 0 = True
+  | a >= width = True
+  | a == d && b == e = True
+  | b >= height - 1 = True
+  | otherwise = coll xs (Blk (d,e) Blue)
 
