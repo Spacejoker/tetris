@@ -23,13 +23,13 @@ main = do
   let queue' = take 10 (createRandomList newGenerator)
   fnt <- openFont "font.ttf" 30
 
-  redBlock <- loadBMP "red.bmp"
-  blueBlock <- loadBMP "blue.bmp"
-  orangeBlock <- loadBMP "orange.bmp"
-  violetBlock <- loadBMP "violet.bmp"
-  greenBlock <- loadBMP "green.bmp"
-  yellowBlock <- loadBMP "yellow.bmp"
-  cyanBlock <- loadBMP "cyan.bmp"
+  redBlock <- loadBMP "images/red.bmp"
+  blueBlock <- loadBMP "images/blue.bmp"
+  orangeBlock <- loadBMP "images/orange.bmp"
+  violetBlock <- loadBMP "images/violet.bmp"
+  greenBlock <- loadBMP "images/green.bmp"
+  yellowBlock <- loadBMP "images/yellow.bmp"
+  cyanBlock <- loadBMP "images/cyan.bmp"
 
   gameLoop (GameState True 0 (Block 4 0 0 randomValue) fnt 0 [] newGenerator GamePlay queue' bg [redBlock, blueBlock, orangeBlock, violetBlock, greenBlock, yellowBlock, cyanBlock])
 
