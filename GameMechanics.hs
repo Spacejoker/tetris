@@ -29,10 +29,10 @@ incrementBlock gs =
         in gs' { field = fld, steps = 0, score = (score gs') + score'}
 
 --generates an endless list of random pieces
-createRandomList :: StdGen -> [Int]
+createRandomList :: StdGen -> [(Int, StdGen)]
 createRandomList gen = 
-  let (a, b) = pieceR gen 
-  in (a : createRandomList b)
+  let x = pieceR gen 
+  in (x : createRandomList (snd x))
 
 genNewBlock :: GameState -> GameState
 genNewBlock gs = 

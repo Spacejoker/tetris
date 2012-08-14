@@ -20,9 +20,12 @@ main = do
 
   stdGen <- getStdGen 
   let (randomValue, newGenerator) = randomR (0, 6) (stdGen) 
-  let queue' = take 10 (createRandomList newGenerator)
-  fnt <- openFont "font.ttf" 30
+  let queuelength = 6
+  let tmp = take queuelength (createRandomList newGenerator)
+  let stdGen' = snd (tmp !! (queuelength -1))
+  let queue' = map (\x -> fst x) tmp
 
+  fnt <- openFont "font.ttf" 30
   redBlock <- loadBMP "images/red.bmp"
   blueBlock <- loadBMP "images/blue.bmp"
   orangeBlock <- loadBMP "images/orange.bmp"
@@ -31,7 +34,7 @@ main = do
   yellowBlock <- loadBMP "images/yellow.bmp"
   cyanBlock <- loadBMP "images/cyan.bmp"
 
-  gameLoop (GameState True 0 (Block 4 0 0 randomValue) fnt 0 [] newGenerator GamePlay queue' bg [redBlock, blueBlock, orangeBlock, violetBlock, greenBlock, yellowBlock, cyanBlock])
+  gameLoop (GameState True 0 (Block 4 0 0 randomValue) fnt 0 [] stdGen' GamePlay queue' bg [redBlock, blueBlock, orangeBlock, violetBlock, greenBlock, yellowBlock, cyanBlock])
 
 -- Main loop, one cycle per paint and logic tick
 gameLoop :: GameState -> IO ()
@@ -66,6 +69,7 @@ handleIngameEvent [x] gs =
     KeyDown (Keysym SDLK_ESCAPE _ _) -> gs { gameActive = False }
     KeyDown (Keysym SDLK_UP _ _) -> rotate gs 
     KeyDown (Keysym SDLK_DOWN _ _) -> gs {steps = ticksPerStep}
+    Quit -> gs { gameActive = False}
     _ -> gs
 
 handleIngameEvents (x:xs) gs = handleIngameEvents xs (handleIngameEvent [x] gs)
