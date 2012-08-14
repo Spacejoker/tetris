@@ -15,8 +15,6 @@ main = do
   setCaption "Mega Haskell Tetris" "efefef" 
 
   enableKeyRepeat 500 30
- 
-  bg <- loadBMP "bg.bmp"
 
   stdGen <- getStdGen 
   let (randomValue, newGenerator) = randomR (0, 6) (stdGen) 
@@ -34,8 +32,12 @@ main = do
   yellowBlock <- loadBMP "images/yellow.bmp"
   cyanBlock <- loadBMP "images/cyan.bmp"
 
-  gameLoop (GameState True 0 (Block 4 0 0 randomValue) fnt 0 [] stdGen' GamePlay queue' bg [redBlock, blueBlock, orangeBlock, violetBlock, greenBlock, yellowBlock, cyanBlock])
+  bg <- loadBMP "bg.bmp"
 
+  let newState = GameState True 0 (Block 4 0 0 randomValue) fnt 0 [] stdGen' Menu queue' bg [redBlock, blueBlock, orangeBlock, violetBlock, greenBlock, yellowBlock, cyanBlock]
+
+  gameLoop newState
+-- delegate = [(Menu, showMenu), (GamePlay, loopGame)]
 -- Main loop, one cycle per paint and logic tick
 gameLoop :: GameState -> IO ()
 gameLoop gs = do
@@ -46,10 +48,53 @@ gameLoop gs = do
   delay 10 
 
   render gs'
- 
+  
+--  gs'
+ -- let gs' = if mode gs == Menu then showMenu gs else loopGame gs
+--  let b = 0
+
+--  let gs'' = mapM gs'
+
   if (gameActive gs')
     then gameLoop  (tick gs')
     else return ()
+
+-- showMenu :: GameState -> IO GameState
+-- showMenu gs = do
+--   putStrLn "in Menu"
+--   events <- getEvents pollEvent []
+--   let gs' = handleMenuEvents events gs
+-- 
+--   delay 10
+
+  -- gs'
+ --renderMenu gs'
+
+-- loopGame :: GameState -> IO GameState
+-- loopGame gs = do
+--   events <- getEvents pollEvent []
+-- 
+--   let gs' = handleIngameEvents events gs
+-- 
+--   delay 10 
+-- 
+--   render gs'
+  
+  -- gs'
+ 
+newGameState :: GameState -> GameState
+newGameState gs = 
+  let stdGen = gen gs 
+      (randomValue, newGenerator) = randomR (0, 6) (stdGen) 
+      queuelength = 6
+      tmp = take queuelength (createRandomList newGenerator)
+      stdGen' = snd (tmp !! (queuelength -1))
+      queue' = map (\x -> fst x) tmp
+  in gs {
+	 score = 0, steps = 0, field = [], queue = queue', block = Block 4 0 0 randomValue
+}
+--GameState True 0 (Block 4 0 0 randomValue) fnt 0 [] stdGen' Menu queue' bg [redBlock, blueBlock, orangeBlock, violetBlock, greenBlock, yellowBlock, cyanBlock]
+
 
 -- stolen code from mr cadr, works nice
 getEvents :: IO Event -> [Event] -> IO [Event]
@@ -60,6 +105,15 @@ getEvents pEvent es = do
     then getEvents pEvent (e:es)
     else return (reverse es)
 
+handleMenuEvents :: [Event] -> GameState -> GameState
+handleMenuEvents [] gs = gs
+handleMenuEvents (x:xs) gs = handleMenuEvents xs (handleMenuEvent x gs)
+
+handleMenuEvent :: Event -> GameState -> GameState
+handleMenuEvent x gs = 
+  case x of
+    KeyDown (Keysym SDLK_SPACE _ _) -> newGameState gs
+
 -- handle the different types of events
 handleIngameEvent :: [Event] -> GameState ->  GameState
 handleIngameEvent [x] gs =
@@ -69,6 +123,7 @@ handleIngameEvent [x] gs =
     KeyDown (Keysym SDLK_ESCAPE _ _) -> gs { gameActive = False }
     KeyDown (Keysym SDLK_UP _ _) -> rotate gs 
     KeyDown (Keysym SDLK_DOWN _ _) -> gs {steps = ticksPerStep}
+    KeyDown (Keysym SDLK_SPACE _ _) -> gs {mode = Menu}
     Quit -> gs { gameActive = False}
     _ -> gs
 
@@ -79,8 +134,6 @@ render :: GameState -> IO ()
 render gs = do 
 
   s <- getVideoSurface
-  -- Clear the screen
-  worked <- fillRect s Nothing  (Pixel 0)
 
   blitSurface (bg gs) Nothing s (Just (Rect 0 0 800 600))
 
@@ -122,7 +175,7 @@ paint' x y (blk:xs) s gs = do
 
 getBrickGraphics :: GameState -> Blk -> Surface
 getBrickGraphics gs blk = 
-  case color blk of
+  case  color blk of 
      Red -> blockGraphics gs !! 0
      Blue -> blockGraphics gs !! 1
      Orange -> blockGraphics gs !! 2
