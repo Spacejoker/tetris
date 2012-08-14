@@ -5,6 +5,14 @@ import Graphics.UI.SDL.TTF as TTF
 
 import System.Random
 
+-- Game Constants
+dim = 24 :: Int 
+width = 10 :: Int
+height = 22 :: Int
+leftOffset = 55 :: Int 
+topOffset = 35 :: Int
+ticksPerStep = 50 :: Int 
+
 data Block = Block {
 	  x :: Int,
 	  y :: Int,
@@ -22,6 +30,11 @@ data GameState = GameState{
 	  gen :: StdGen,
 	  mode :: GameMode
         }
+
+data GraphicsProvider = GraphicsProvider {
+	  
+	}
+
 data GameMode = Menu | GamePlay | Credits
 data Clr = Blue | Red
 

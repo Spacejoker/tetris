@@ -8,7 +8,8 @@
 
 3. Gameplay:
 	- Scoring
-	- Show next piece
+	- Load graphics at startup
+	- Show next pieces on an elevator
 
 4. Graphics:
 	- Make it ugly!
