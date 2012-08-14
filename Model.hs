@@ -30,15 +30,12 @@ data GameState = GameState{
 	  gen :: StdGen,
 	  mode :: GameMode,
 	  queue :: [Int],
-	  bg :: Surface
+	  bg :: Surface,
+	  blockGraphics :: [Surface]
         }
 
-data GraphicsProvider = GraphicsProvider {
-	  
-	}
-
 data GameMode = Menu | GamePlay | Credits
-data Clr = Blue | Red
+data Clr = Blue | Red | Orange | Green | Yellow | Cyan | Violet
 
 data Blk = Blk {
 	  pos :: (Int, Int),
@@ -48,12 +45,12 @@ data Blk = Blk {
 blocks = [blockI, blockJ, blockT, blockO, blockZ, blockS, blockL]
 
 blockO = [[Blk (1,1) Red, Blk (2,1) Red ,Blk (2,2) Red ,Blk (1,2) Red ]] :: [[Blk]]
-blockI = [[Blk (2,0) Red ,Blk (2,1) Red ,Blk (2,2) Red ,Blk (2,3) Red ],[Blk (0,1) Red ,Blk (1,1) Red ,Blk (2,1) Red ,Blk (3,1) Red ]] :: [[Blk]]
-blockS = [[Blk (1,2) Red ,Blk (2,1) Red ,Blk (2,2) Red ,Blk (3,1) Red ],[Blk (2,0) Red ,Blk (2,1) Red ,Blk (3,1) Red ,Blk (3,2) Red ]] :: [[Blk]]
-blockZ = [[Blk (1,1) Red ,Blk (2,1) Red ,Blk (2,2) Red ,Blk (3,2) Red ],[Blk (3,0) Red ,Blk (2,1) Red ,Blk (3,1) Red ,Blk (2,2) Red ]] :: [[Blk]]
-blockL = [[Blk (1,1) Red ,Blk (1,2) Red ,Blk (2,1) Red ,Blk (3,1) Red ],[Blk (2,0) Red ,Blk (3,2) Red ,Blk (2,1) Red ,Blk (2,2) Red ],[Blk (3,0) Red ,Blk (1,1) Red ,Blk (2,1) Red ,Blk (3,1) Red ],[Blk (2,0) Red ,Blk (2,1) Red ,Blk (2,2) Red ,Blk (1,0) Red ]] :: [[Blk]]
-blockJ = [[Blk (2,0) Red ,Blk (2,1) Red ,Blk (2,2) Red ,Blk (1,2) Red ],[Blk (1,1) Red ,Blk (2,1) Red ,Blk (3,1) Red ,Blk (3,2) Red ],[Blk (2,0) Red ,Blk (3,0) Red ,Blk (2,1) Red ,Blk (2,2) Red ],[Blk (1,0) Red ,Blk (1,1) Red ,Blk (2,1) Red ,Blk (3,1) Red ]] :: [[Blk]]
-blockT = [[Blk (1,1) Red ,Blk (2,1) Red ,Blk (3,1) Red ,Blk (2,2) Red ],[Blk (2,0) Red ,Blk (2,1) Red ,Blk (2,2) Red ,Blk (3,1) Red ],[Blk (1,1) Red ,Blk (2,1) Red ,Blk (3,1) Red ,Blk (2,0) Red ],[Blk (1,1) Red ,Blk (2,1) Red ,Blk (2,0) Red ,Blk (2,2) Red ]] :: [[Blk]]
+blockI = [[Blk (2,0) Blue ,Blk (2,1) Blue ,Blk (2,2) Blue ,Blk (2,3) Blue ],[Blk (0,1) Blue ,Blk (1,1) Blue ,Blk (2,1) Blue ,Blk (3,1) Blue ]] :: [[Blk]]
+blockS = [[Blk (1,2) Orange ,Blk (2,1) Orange ,Blk (2,2) Orange ,Blk (3,1) Orange ],[Blk (2,0) Orange ,Blk (2,1) Orange ,Blk (3,1) Orange ,Blk (3,2) Orange ]] :: [[Blk]]
+blockZ = [[Blk (1,1) Green ,Blk (2,1) Green ,Blk (2,2) Green ,Blk (3,2) Green ],[Blk (3,0) Green ,Blk (2,1) Green ,Blk (3,1) Green ,Blk (2,2) Green ]] :: [[Blk]]
+blockL = [[Blk (1,1) Yellow ,Blk (1,2) Yellow ,Blk (2,1) Yellow ,Blk (3,1) Yellow ],[Blk (2,0) Yellow ,Blk (3,2) Yellow ,Blk (2,1) Yellow ,Blk (2,2) Yellow ],[Blk (3,0) Yellow ,Blk (1,1) Yellow ,Blk (2,1) Yellow ,Blk (3,1) Yellow ],[Blk (2,0) Yellow ,Blk (2,1) Yellow ,Blk (2,2) Yellow ,Blk (1,0) Yellow ]] :: [[Blk]]
+blockJ = [[Blk (2,0) Cyan ,Blk (2,1) Cyan ,Blk (2,2) Cyan ,Blk (1,2) Cyan ],[Blk (1,1) Cyan ,Blk (2,1) Cyan ,Blk (3,1) Cyan ,Blk (3,2) Cyan ],[Blk (2,0) Cyan ,Blk (3,0) Cyan ,Blk (2,1) Cyan ,Blk (2,2) Cyan ],[Blk (1,0) Cyan ,Blk (1,1) Cyan ,Blk (2,1) Cyan ,Blk (3,1) Cyan ]] :: [[Blk]]
+blockT = [[Blk (1,1) Violet ,Blk (2,1) Violet ,Blk (3,1) Violet ,Blk (2,2) Violet ],[Blk (2,0) Violet ,Blk (2,1) Violet ,Blk (2,2) Violet ,Blk (3,1) Violet ],[Blk (1,1) Violet ,Blk (2,1) Violet ,Blk (3,1) Violet ,Blk (2,0) Violet ],[Blk (1,1) Violet ,Blk (2,1) Violet ,Blk (2,0) Violet ,Blk (2,2) Violet ]] :: [[Blk]]
 
 
 

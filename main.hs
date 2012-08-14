@@ -22,7 +22,16 @@ main = do
   let (randomValue, newGenerator) = randomR (0, 6) (stdGen) 
   let queue' = take 10 (createRandomList newGenerator)
   fnt <- openFont "font.ttf" 30
-  gameLoop (GameState True 0 (Block 4 0 0 randomValue) fnt 0 [] newGenerator GamePlay queue' bg)
+
+  redBlock <- loadBMP "red.bmp"
+  blueBlock <- loadBMP "blue.bmp"
+  orangeBlock <- loadBMP "orange.bmp"
+  violetBlock <- loadBMP "violet.bmp"
+  greenBlock <- loadBMP "green.bmp"
+  yellowBlock <- loadBMP "yellow.bmp"
+  cyanBlock <- loadBMP "cyan.bmp"
+
+  gameLoop (GameState True 0 (Block 4 0 0 randomValue) fnt 0 [] newGenerator GamePlay queue' bg [redBlock, blueBlock, orangeBlock, violetBlock, greenBlock, yellowBlock, cyanBlock])
 
 -- Main loop, one cycle per paint and logic tick
 gameLoop :: GameState -> IO ()
@@ -80,31 +89,17 @@ render gs = do
   title <- renderTextSolid (font gs) ("Score: " ++ (show (score gs))) (Color 255 0 0)
   blitSurface title Nothing s (Just (Rect 515 80 200 40))
   
-  paintField (getBlockPositions gs) s
+  paint' leftOffset topOffset (merge (getBlockPositions gs) (field gs)) s gs
 
-  paintField (field gs) s 
-
-  paintQueue (queue gs) 0 s
+  paintQueue (queue gs) 0 s gs
 
   SDL.flip s
 
-paintField :: [Blk] -> Surface -> IO()
-paintField [] _  = do return ()
-paintField (x:xs) s = do
-  paintSquare x s 
-  paintField xs s 
-
-paintSquare :: Blk -> Surface -> IO Bool
-paintSquare blk s = do
-  let x' = (fst (pos blk)) * dim + leftOffset
-  let y' = (snd (pos blk)) * dim + topOffset
-  fillRect s (Just (Rect x' y' dim dim)) (Pixel 255) 
-
-paintQueue :: [Int] -> Int -> Surface -> IO ()
-paintQueue [] _ _ = return ()
-paintQueue (x:xs) nr s = do 
-  paint' 330 (nr*100) ((blocks !! x) !! (getShowRot x)) s 
-  paintQueue xs (nr+1) s
+paintQueue :: [Int] -> Int -> Surface -> GameState -> IO ()
+paintQueue [] _ _ _ = return ()
+paintQueue (x:xs) nr s gs= do 
+  paint' 330 (nr*100) ((blocks !! x) !! (getShowRot x)) s gs
+  paintQueue xs (nr+1) s gs
 
 getShowRot :: Int -> Int
 getShowRot x =
@@ -112,12 +107,22 @@ getShowRot x =
     0 -> 1
     _ -> 0
 
-paint' :: Int -> Int -> [Blk] -> Surface -> IO Bool
-paint' _ _ [] _= return True 
-paint' x y (blk:xs) s = do
+paint' :: Int -> Int -> [Blk] -> Surface -> GameState -> IO Bool
+paint' _ _ [] _ _ = return True 
+paint' x y (blk:xs) s gs = do
   let x' = (fst (pos blk)) * dim + x
   let y' = (snd (pos blk)) * dim + y
---  putStrLn (show x') ++ " " ++ (show y')
-  fillRect s (Just (Rect x' y' dim dim)) (Pixel 255) 
-  paint' x y xs s
+  let bmp = getBrickGraphics gs blk
+  blitSurface bmp Nothing s (Just (Rect x' y' dim dim)) 
+  paint' x y xs s gs
 
+getBrickGraphics :: GameState -> Blk -> Surface
+getBrickGraphics gs blk = 
+  case color blk of
+     Red -> blockGraphics gs !! 0
+     Blue -> blockGraphics gs !! 1
+     Orange -> blockGraphics gs !! 2
+     Violet -> blockGraphics gs !! 3
+     Green -> blockGraphics gs !! 4
+     Yellow -> blockGraphics gs !! 5
+     _ -> blockGraphics gs !! 6

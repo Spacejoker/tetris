@@ -11,6 +11,7 @@
 	- Difficulty increasing - with higher scoring
 	- Refactor to have graphics in a good structure
 	- Handle different images for the different blocks
+	- Space -> put piece in place instantly
 
 4. Graphics:
 	- Make it ugly!
