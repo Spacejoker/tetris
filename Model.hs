@@ -19,9 +19,10 @@ data GameState = GameState{
 	  font :: Font,
 	  steps :: Int,
 	  field :: [Blk],
-	  gen :: StdGen
+	  gen :: StdGen,
+	  mode :: GameMode
         }
-
+data GameMode = Menu | GamePlay | Credits
 data Clr = Blue | Red
 
 data Blk = Blk {

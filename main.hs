@@ -9,8 +9,8 @@ import Model
 dim = 24
 width = 10
 height = 22
-leftOffset = 20
-topOffset = 20
+leftOffset = 55
+topOffset = 35
 ticksPerStep = 50
 
 main = do
@@ -26,14 +26,14 @@ main = do
   let (randomValue, newGenerator) = randomR (0, 6) (stdGen) 
 
   fnt <- openFont "font.ttf" 30
-  gameLoop (GameState True 0 (Block 4 0 0 randomValue) fnt 0 [] newGenerator) 
+  gameLoop (GameState True 0 (Block 4 0 0 randomValue) fnt 0 [] newGenerator GamePlay)
 
 -- Main loop, one cycle per paint and logic tick
 gameLoop :: GameState -> IO ()
 gameLoop gs = do
   events <- getEvents pollEvent []
 
-  let gs' = handleEvents events gs
+  let gs' = handleIngameEvents events gs
 
   delay 10 
 
@@ -124,8 +124,8 @@ getEvents pEvent es = do
     else return (reverse es)
 
 -- handle the different types of events
-handleEvents :: [Event] -> GameState ->  GameState
-handleEvents [x] gs =
+handleIngameEvent :: [Event] -> GameState ->  GameState
+handleIngameEvent [x] gs =
   case x of 
     KeyDown (Keysym SDLK_RIGHT _ _) -> move 1 0 gs 
     KeyDown (Keysym SDLK_LEFT _ _) -> move (-1) 0 gs 
@@ -134,8 +134,8 @@ handleEvents [x] gs =
     KeyDown (Keysym SDLK_DOWN _ _) -> gs {steps = ticksPerStep}
     _ -> gs
 
-handleEvents (x:xs) gs = handleEvents xs (handleEvents [x] gs)
-handleEvents [] gs = gs
+handleIngameEvents (x:xs) gs = handleIngameEvents xs (handleIngameEvent [x] gs)
+handleIngameEvents [] gs = gs
 
 rotate :: GameState -> GameState
 rotate gs = 
