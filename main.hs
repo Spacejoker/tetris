@@ -99,8 +99,14 @@ paintSquare blk s = do
 paintQueue :: [Int] -> Int -> Surface -> IO ()
 paintQueue [] _ _ = return ()
 paintQueue (x:xs) nr s = do 
-  paint' 310 (nr*100) ((blocks !! x) !! 0) s 
+  paint' 330 (nr*100) ((blocks !! x) !! (getShowRot x)) s 
   paintQueue xs (nr+1) s
+
+getShowRot :: Int -> Int
+getShowRot x =
+  case x of
+    0 -> 1
+    _ -> 0
 
 paint' :: Int -> Int -> [Blk] -> Surface -> IO Bool
 paint' _ _ [] _= return True 
