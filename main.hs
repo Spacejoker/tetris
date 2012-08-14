@@ -16,11 +16,13 @@ main = do
 
   enableKeyRepeat 500 30
  
+  bg <- loadBMP "bg.bmp"
+
   stdGen <- getStdGen 
   let (randomValue, newGenerator) = randomR (0, 6) (stdGen) 
   let queue' = take 10 (createRandomList newGenerator)
   fnt <- openFont "font.ttf" 30
-  gameLoop (GameState True 0 (Block 4 0 0 randomValue) fnt 0 [] newGenerator GamePlay queue')
+  gameLoop (GameState True 0 (Block 4 0 0 randomValue) fnt 0 [] newGenerator GamePlay queue' bg)
 
 -- Main loop, one cycle per paint and logic tick
 gameLoop :: GameState -> IO ()
@@ -67,14 +69,17 @@ render gs = do
   -- Clear the screen
   worked <- fillRect s Nothing  (Pixel 0)
 
-  bg <- loadBMP "bg.bmp"
-  blitSurface bg Nothing s (Just (Rect 0 0 800 600))
+  blitSurface (bg gs) Nothing s (Just (Rect 0 0 800 600))
 
   title <- renderTextSolid (font gs) "Mega Haskell" (Color 255 0 0)
   blitSurface title Nothing s (Just (Rect 510 10 200 400))
 
   title <- renderTextSolid (font gs) "Tetris" (Color 255 0 0)
   blitSurface title Nothing s (Just (Rect 515 40 200 40))
+  
+  let score' = (show (score gs))
+  title <- renderTextSolid (font gs) score' (Color 255 0 0)
+  blitSurface title Nothing s (Just (Rect 515 80 200 40))
   
   paintField (getBlockPositions gs) s
 

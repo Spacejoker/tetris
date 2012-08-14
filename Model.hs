@@ -29,7 +29,8 @@ data GameState = GameState{
 	  field :: [Blk],
 	  gen :: StdGen,
 	  mode :: GameMode,
-	  queue :: [Int]
+	  queue :: [Int],
+	  bg :: Surface
         }
 
 data GraphicsProvider = GraphicsProvider {

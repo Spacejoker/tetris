@@ -23,10 +23,10 @@ incrementBlock gs =
         in gs {steps = 0, block = b}
    else let 
 	    merged = merge (getBlockPositions gs) (field gs)
-	    score = getScoreForClear (length (getRmLines merged))
+	    score' = getScoreForClear (length (getRmLines merged))
 	    fld = clearDone  merged
 	    gs' = genNewBlock gs
-        in gs' { field = fld, steps = 0}
+        in gs' { field = fld, steps = 0, score = (score gs') + score'}
 
 --generates an endless list of random pieces
 createRandomList :: StdGen -> [Int]
