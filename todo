@@ -7,9 +7,11 @@
 	- Scrolling text in the bottom :)
 
 3. Gameplay:
-	- Scoring
-	- Load graphics at startup
 	- Animate the elevator
+	- Difficulty increasing - with higher scoring
+	- Refactor to have graphics in a good structure
+	- Handle different images for the different blocks
 
 4. Graphics:
 	- Make it ugly!
+	- Make skeleton for the moving blocks, for each color

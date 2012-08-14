@@ -77,8 +77,7 @@ render gs = do
   title <- renderTextSolid (font gs) "Tetris" (Color 255 0 0)
   blitSurface title Nothing s (Just (Rect 515 40 200 40))
   
-  let score' = (show (score gs))
-  title <- renderTextSolid (font gs) score' (Color 255 0 0)
+  title <- renderTextSolid (font gs) ("Score: " ++ (show (score gs))) (Color 255 0 0)
   blitSurface title Nothing s (Just (Rect 515 80 200 40))
   
   paintField (getBlockPositions gs) s
