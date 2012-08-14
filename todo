@@ -1,6 +1,6 @@
 1. Menu:
 	- Ongoing gameplay behind
-	- Choices: Start game, Credits, (High Scores)
+	- Choices: Start game, Credits
 
 2. Credits:
 	- Demo-style, balls spinning in the background, using old school-music and atari-style graphics
@@ -9,7 +9,7 @@
 3. Gameplay:
 	- Scoring
 	- Load graphics at startup
-	- Show next pieces on an elevator
+	- Animate the elevator
 
 4. Graphics:
 	- Make it ugly!

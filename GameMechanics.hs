@@ -22,7 +22,9 @@ incrementBlock gs =
 	    b = b' {y = ((y b')+1)}
         in gs {steps = 0, block = b}
    else let 
-	    fld = permanentBlock (getBlockPositions gs) (field gs)
+	    merged = merge (getBlockPositions gs) (field gs)
+	    score = getScoreForClear (length (getRmLines merged))
+	    fld = clearDone  merged
 	    gs' = genNewBlock gs
         in gs' { field = fld, steps = 0}
 
@@ -44,13 +46,10 @@ makeBlks :: [(Int, Int)] -> Clr -> [Blk]
 makeBlks [x] clr = [Blk x clr]
 makeBlks (x:xs) clr = Blk x clr: makeBlks xs clr
 
-permanentBlock :: [Blk] -> [Blk] -> [Blk]
-permanentBlock a b = clearDone (merge a b)
-
 clearDone ::[Blk] -> [Blk]
 clearDone fld =
-  let cnt = countElementPerLine fld
-      rmLines = getRmLines 0 cnt
+  let 
+      rmLines = getRmLines fld
       fld' = clearLines fld rmLines
       fld'' = shiftLines fld' rmLines
       in fld''
@@ -60,12 +59,18 @@ shiftLines (Blk (a,b) c:xs) lst =
   let nrShifts = length $ filter (>b) lst
   in (Blk (a, b +nrShifts) c:shiftLines xs lst)
 
-getRmLines :: Int -> [Int] -> [Int]
-getRmLines _ [] = []
-getRmLines curLine (x : xs) =
+getRmLines :: [Blk] -> [Int]
+getRmLines fld =
+      let cnt = countElementPerLine fld
+          rmLines = getRmLines' 0 cnt
+      in rmLines
+
+getRmLines' :: Int -> [Int] -> [Int]
+getRmLines' _ [] = []
+getRmLines' curLine (x : xs) =
   case x >= width of
-    True -> (curLine : getRmLines (curLine +1)  xs)
-    otherwise -> getRmLines (curLine+1) xs
+    True -> (curLine : getRmLines' (curLine +1)  xs)
+    otherwise -> getRmLines' (curLine+1) xs
 
 clearLines :: [Blk] -> [Int] -> [Blk]
 clearLines [] _ = []
@@ -91,3 +96,12 @@ getBlockPositions gs =
   let b = block gs
       curBlock = blocks !! (blockId b)
   in map (addPosition (x b) (y b)) (curBlock  !! (rot b))
+
+getScoreForClear :: Int -> Int
+getScoreForClear numRows =
+  case numRows of
+    1 -> 100
+    2 -> 200
+    3 -> 400
+    4 -> 800
+    _ -> 0
