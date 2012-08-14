@@ -77,7 +77,7 @@ permanentBlock a b = clearDone (merge a b)
 clearDone ::[Blk] -> [Blk]
 clearDone fld =
   let cnt = countElementPerLine fld
-      rmLines = fullLines 0 cnt
+      rmLines = getRmLines 0 cnt
       fld' = clearLines fld rmLines
       fld'' = shiftLines fld' rmLines
       in fld''
@@ -87,12 +87,12 @@ shiftLines (Blk (a,b) c:xs) lst =
   let nrShifts = length $ filter (>b) lst
   in (Blk (a, b +nrShifts) c:shiftLines xs lst)
 
-fullLines :: Int -> [Int] -> [Int]
-fullLines _ [] = []
-fullLines curLine (x : xs) =
+getRmLines :: Int -> [Int] -> [Int]
+getRmLines _ [] = []
+getRmLines curLine (x : xs) =
   case x >= width of
-    True -> (curLine : fullLines (curLine +1)  xs)
-    otherwise -> fullLines (curLine+1) xs
+    True -> (curLine : getRmLines (curLine +1)  xs)
+    otherwise -> getRmLines (curLine+1) xs
 
 clearLines :: [Blk] -> [Int] -> [Blk]
 clearLines [] _ = []
