@@ -28,7 +28,8 @@ data GameState = GameState{
 	  steps :: Int,
 	  field :: [Blk],
 	  gen :: StdGen,
-	  mode :: GameMode
+	  mode :: GameMode,
+	  queue :: [Int]
         }
 
 data GraphicsProvider = GraphicsProvider {

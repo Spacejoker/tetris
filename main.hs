@@ -18,9 +18,9 @@ main = do
  
   stdGen <- getStdGen 
   let (randomValue, newGenerator) = randomR (0, 6) (stdGen) 
-
+  let queue' = take 10 (createRandomList newGenerator)
   fnt <- openFont "font.ttf" 30
-  gameLoop (GameState True 0 (Block 4 0 0 randomValue) fnt 0 [] newGenerator GamePlay)
+  gameLoop (GameState True 0 (Block 4 0 0 randomValue) fnt 0 [] newGenerator GamePlay queue')
 
 -- Main loop, one cycle per paint and logic tick
 gameLoop :: GameState -> IO ()
@@ -59,14 +59,6 @@ handleIngameEvent [x] gs =
 
 handleIngameEvents (x:xs) gs = handleIngameEvents xs (handleIngameEvent [x] gs)
 handleIngameEvents [] gs = gs
-
-rotate :: GameState -> GameState
-rotate gs = 
-  let  rot' = ((rot (block gs))+ 1) `mod` (length (blocks !! (blockId (block gs))))  
-       block' = (block gs) { rot = rot' } 
-  in case nextIsFree gs{block = block'} (0,0) of
-              False -> gs
-              otherwise -> gs { block = block'} 
 
 render :: GameState -> IO ()
 render gs = do 

@@ -30,3 +30,14 @@ coll [] (Blk (a,b) f)
 coll (Blk (a,b) _ :xs) (Blk (d,e) f)
   | a == d && b == e = True
   | otherwise = coll xs (Blk (d,e) f)
+
+rotate :: GameState -> GameState
+rotate gs = 
+  let  rot' = ((rot (block gs))+ 1) `mod` (length (blocks !! (blockId (block gs))))  
+       block' = (block gs) { rot = rot' } 
+  in case nextIsFree gs{block = block'} (0,0) of
+              False -> gs
+              otherwise -> gs { block = block'} 
+
+nextIsFree :: GameState -> (Int, Int)-> Bool
+nextIsFree gs change = legalPosition (x (block gs) + (fst change)) (y (block gs) + (snd change)) gs 
