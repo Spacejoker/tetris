@@ -80,6 +80,8 @@ render gs = do
 
   paintField (field gs) s 
 
+  paintQueue (queue gs) 0 s
+
   SDL.flip s
 
 paintField :: [Blk] -> Surface -> IO()
@@ -93,4 +95,19 @@ paintSquare blk s = do
   let x' = (fst (pos blk)) * dim + leftOffset
   let y' = (snd (pos blk)) * dim + topOffset
   fillRect s (Just (Rect x' y' dim dim)) (Pixel 255) 
+
+paintQueue :: [Int] -> Int -> Surface -> IO ()
+paintQueue [] _ _ = return ()
+paintQueue (x:xs) nr s = do 
+  paint' 310 (nr*100) ((blocks !! x) !! 0) s 
+  paintQueue xs (nr+1) s
+
+paint' :: Int -> Int -> [Blk] -> Surface -> IO Bool
+paint' _ _ [] _= return True 
+paint' x y (blk:xs) s = do
+  let x' = (fst (pos blk)) * dim + x
+  let y' = (snd (pos blk)) * dim + y
+--  putStrLn (show x') ++ " " ++ (show y')
+  fillRect s (Just (Rect x' y' dim dim)) (Pixel 255) 
+  paint' x y xs s
 

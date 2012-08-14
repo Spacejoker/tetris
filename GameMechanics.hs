@@ -22,11 +22,9 @@ incrementBlock gs =
 	    b = b' {y = ((y b')+1)}
         in gs {steps = 0, block = b}
    else let 
---	    gs' = genNewBlock gs
-	    (val, gen') = pieceR (gen gs)
-	    b = Block 0 0 0 val 
 	    fld = permanentBlock (getBlockPositions gs) (field gs)
-        in gs { field = fld, steps = 0, block = b, gen = gen' }
+	    gs' = genNewBlock gs
+        in gs' { field = fld, steps = 0}
 
 --generates an endless list of random pieces
 createRandomList :: StdGen -> [Int]
