@@ -36,12 +36,20 @@ main = do
   bg <- loadBMP "bg.bmp"
   menubg <- loadBMP "menubg.bmp"
 
-  newmenu0 <- SDLi.load "images/newgame_0.png"
-  newmenu1 <- SDLi.load "images/newgame_1.png"
-  newmenu2 <- SDLi.load "images/newgame_2.png"
-  newmenu3 <- SDLi.load "images/newgame_3.png"
+  newmenu0 <- SDLi.load "images/newgame0.png"
+  newmenu1 <- SDLi.load "images/newgame1.png"
+  newmenu2 <- SDLi.load "images/newgame2.png"
+  newmenu3 <- SDLi.load "images/newgame3.png"
+  newmenu4 <- SDLi.load "images/newgame4.png"
 
-  let graphics = Graphics bg [redBlock, blueBlock, orangeBlock, violetBlock, greenBlock, yellowBlock, cyanBlock] menubg [newmenu0, newmenu1, newmenu2, newmenu3, newmenu2, newmenu1]
+  credits0 <- SDLi.load "images/credits0.png"
+  credits1 <- SDLi.load "images/credits1.png"
+  credits2 <- SDLi.load "images/credits2.png"
+  credits3 <- SDLi.load "images/credits3.png"
+  credits4 <- SDLi.load "images/credits4.png"
+  let menuAnimation = [newmenu0, newmenu1, newmenu2, newmenu3, newmenu4, newmenu3, newmenu2, newmenu1]
+  let creditAnimation = [credits0, credits1,  credits2,  credits3,  credits4,  credits3,  credits2,  credits1] 
+  let graphics = Graphics bg [redBlock, blueBlock, orangeBlock, violetBlock, greenBlock, yellowBlock, cyanBlock] menubg menuAnimation creditAnimation 
   let newState = GameState True 0 (Block 4 0 0 randomValue) fnt 0 [] stdGen' Menu queue' graphics False 0
 
   gameLoop newState
