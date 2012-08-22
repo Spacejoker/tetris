@@ -31,7 +31,8 @@ data GameState = GameState{
 	  mode :: GameMode,
 	  queue :: [Int],
 	  bg :: Surface,
-	  blockGraphics :: [Surface]
+	  blockGraphics :: [Surface],
+	  menubg :: Surface
         }
 
 data GameMode = Menu | GamePlay | Credits
