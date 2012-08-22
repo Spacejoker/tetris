@@ -36,6 +36,7 @@ data GameState = GameState{
 
 data GameMode = Menu | GamePlay | Credits
 data Clr = Blue | Red | Orange | Green | Yellow | Cyan | Violet
+  deriving (Eq)
 
 data Blk = Blk {
 	  pos :: (Int, Int),

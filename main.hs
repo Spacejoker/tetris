@@ -41,6 +41,45 @@ main = do
 -- Main loop, one cycle per paint and logic tick
 gameLoop :: GameState -> IO ()
 gameLoop gs = do
+  --events <- getEvents pollEvent []
+
+  --let gs' = handleIngameEvents events gs
+
+  --delay 10 
+
+  --render gs'
+  --gs'' <- unwrap gs'
+--  gs'
+ -- let gs' = if mode gs == Menu then showMenu gs else loopGame gs
+--  let b = 0
+
+--  let gs'' = mapM gs'
+
+  gs' <- tickGame gs-- if (mode gs) == GamePlay then showMenu gs else loopGame gs
+ 
+  if (gameActive gs')
+    then gameLoop  (tick gs')
+    else return ()
+
+tickGame :: GameState -> IO GameState
+tickGame gs = do
+  case (mode gs) of
+    GamePlay -> loopGame gs
+    otherwise -> showMenu gs
+
+showMenu :: GameState -> IO GameState
+showMenu gs = do
+  putStrLn "in Menu"
+  events <- getEvents pollEvent []
+  let gs' = handleMenuEvents events gs
+
+  delay 10
+
+  renderMenu gs'
+  return gs'
+
+loopGame :: GameState -> IO GameState
+loopGame gs = do
   events <- getEvents pollEvent []
 
   let gs' = handleIngameEvents events gs
@@ -48,40 +87,8 @@ gameLoop gs = do
   delay 10 
 
   render gs'
-  
---  gs'
- -- let gs' = if mode gs == Menu then showMenu gs else loopGame gs
---  let b = 0
+  return gs'
 
---  let gs'' = mapM gs'
-
-  if (gameActive gs')
-    then gameLoop  (tick gs')
-    else return ()
-
--- showMenu :: GameState -> IO GameState
--- showMenu gs = do
---   putStrLn "in Menu"
---   events <- getEvents pollEvent []
---   let gs' = handleMenuEvents events gs
--- 
---   delay 10
-
-  -- gs'
- --renderMenu gs'
-
--- loopGame :: GameState -> IO GameState
--- loopGame gs = do
---   events <- getEvents pollEvent []
--- 
---   let gs' = handleIngameEvents events gs
--- 
---   delay 10 
--- 
---   render gs'
-  
-  -- gs'
- 
 newGameState :: GameState -> GameState
 newGameState gs = 
   let stdGen = gen gs 
@@ -91,7 +98,7 @@ newGameState gs =
       stdGen' = snd (tmp !! (queuelength -1))
       queue' = map (\x -> fst x) tmp
   in gs {
-	 score = 0, steps = 0, field = [], queue = queue', block = Block 4 0 0 randomValue
+	 score = 0, steps = 0, field = [], queue = queue', block = Block 4 0 0 randomValue, mode = GamePlay
 }
 --GameState True 0 (Block 4 0 0 randomValue) fnt 0 [] stdGen' Menu queue' bg [redBlock, blueBlock, orangeBlock, violetBlock, greenBlock, yellowBlock, cyanBlock]
 
@@ -113,6 +120,8 @@ handleMenuEvent :: Event -> GameState -> GameState
 handleMenuEvent x gs = 
   case x of
     KeyDown (Keysym SDLK_SPACE _ _) -> newGameState gs
+    KeyDown (Keysym SDLK_ESCAPE _ _) -> gs { gameActive = False }
+    _ -> gs
 
 -- handle the different types of events
 handleIngameEvent :: [Event] -> GameState ->  GameState
@@ -129,6 +138,15 @@ handleIngameEvent [x] gs =
 
 handleIngameEvents (x:xs) gs = handleIngameEvents xs (handleIngameEvent [x] gs)
 handleIngameEvents [] gs = gs
+
+renderMenu :: GameState -> IO ()
+renderMenu gs = do
+  s <- getVideoSurface
+
+  title <- renderTextSolid (font gs) "Menu Mega version olol" (Color 255 0 0)
+  blitSurface title Nothing s (Just (Rect 510 10 200 400))
+ 
+  SDL.flip s
 
 render :: GameState -> IO ()
 render gs = do 
