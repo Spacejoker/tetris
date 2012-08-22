@@ -31,13 +31,15 @@ data GameState = GameState{
 	  mode :: GameMode,
 	  queue :: [Int],
 	  graphics :: Graphics,
-	  lost :: Bool
+	  lost :: Bool,
+	  menuchoice :: Int
         }
 
 data Graphics = Graphics{	
 	  bg :: Surface,
 	  blockGraphics :: [Surface],
-	  menubg :: Surface
+	  menubg :: Surface,
+	  newGame :: [Surface]
 	}
 
 data GameMode = Menu | GamePlay | Credits

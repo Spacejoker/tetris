@@ -1,5 +1,6 @@
 import Graphics.UI.SDL as SDL
 import Graphics.UI.SDL.TTF as TTF
+import Graphics.UI.SDL.Image as SDLi
 
 import System.Random
 
@@ -35,8 +36,13 @@ main = do
   bg <- loadBMP "bg.bmp"
   menubg <- loadBMP "menubg.bmp"
 
-  let graphics = Graphics bg [redBlock, blueBlock, orangeBlock, violetBlock, greenBlock, yellowBlock, cyanBlock] menubg
-  let newState = GameState True 0 (Block 4 0 0 randomValue) fnt 0 [] stdGen' Menu queue' graphics False
+  newmenu0 <- SDLi.load "images/newgame_0.png"
+  newmenu1 <- SDLi.load "images/newgame_1.png"
+  newmenu2 <- SDLi.load "images/newgame_2.png"
+  newmenu3 <- SDLi.load "images/newgame_3.png"
+
+  let graphics = Graphics bg [redBlock, blueBlock, orangeBlock, violetBlock, greenBlock, yellowBlock, cyanBlock] menubg [newmenu0, newmenu1, newmenu2, newmenu3, newmenu2, newmenu1]
+  let newState = GameState True 0 (Block 4 0 0 randomValue) fnt 0 [] stdGen' Menu queue' graphics False 0
 
   gameLoop newState
 
@@ -62,7 +68,7 @@ showMenu gs = do
   delay 10
 
   renderMenu gs'
-  return gs'
+  return gs' { steps = (steps gs) + 1}
 
 loopGame :: GameState -> IO GameState
 loopGame gs = do
@@ -73,6 +79,7 @@ loopGame gs = do
   delay 10 
 
   render gs'
+
   case lost gs of
     False -> return (tick gs')
     True -> return gs'
@@ -104,6 +111,7 @@ handleMenuEvent :: Event -> GameState -> GameState
 handleMenuEvent x gs = 
   case x of
     KeyDown (Keysym SDLK_SPACE _ _) -> newGameState gs
+    KeyDown (Keysym SDLK_RETURN _ _) -> newGameState gs
     KeyDown (Keysym SDLK_ESCAPE _ _) -> gs { gameActive = False }
     _ -> gs
 
@@ -114,6 +122,7 @@ handleIngameEvent [x] gs =
     KeyDown (Keysym SDLK_RIGHT _ _) -> move 1 0 gs 
     KeyDown (Keysym SDLK_LEFT _ _) -> move (-1) 0 gs 
     KeyDown (Keysym SDLK_ESCAPE _ _) -> gs { mode = Menu }
+    KeyDown (Keysym SDLK_RETURN _ _) -> gs { mode = Menu }
     KeyDown (Keysym SDLK_UP _ _) -> rotate gs 
     KeyDown (Keysym SDLK_DOWN _ _) -> gs {steps = ticksPerStep}
     KeyDown (Keysym SDLK_SPACE _ _) -> gs {mode = Menu}
@@ -135,6 +144,10 @@ renderMenu gs = do
   
   title <- renderTextSolid (font gs) "Space to start new  game" (Color 255 0 0)
   blitSurface title Nothing s (Just (Rect 330 150 200 400))
+
+  let imgnr = (floor ((fromIntegral (steps gs))/10.0)) `mod` (length (newGame gr))
+  let newGameFrame = (newGame gr)!! imgnr 
+  blitSurface newGameFrame Nothing s (Just (Rect 300 300 400 400))
  
   SDL.flip s
 
