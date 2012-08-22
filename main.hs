@@ -35,7 +35,8 @@ main = do
   bg <- loadBMP "bg.bmp"
   menubg <- loadBMP "menubg.bmp"
 
-  let newState = GameState True 0 (Block 4 0 0 randomValue) fnt 0 [] stdGen' Menu queue' bg [redBlock, blueBlock, orangeBlock, violetBlock, greenBlock, yellowBlock, cyanBlock] menubg
+  let graphics = Graphics bg [redBlock, blueBlock, orangeBlock, violetBlock, greenBlock, yellowBlock, cyanBlock] menubg
+  let newState = GameState True 0 (Block 4 0 0 randomValue) fnt 0 [] stdGen' Menu queue' graphics
 
   gameLoop newState
 
@@ -128,7 +129,8 @@ renderMenu :: GameState -> IO ()
 renderMenu gs = do
   s <- getVideoSurface
 
-  blitSurface (menubg gs) Nothing s (Just (Rect 0 0 800 600))
+  let gr = (graphics gs)
+  blitSurface (menubg gr) Nothing s (Just (Rect 0 0 800 600))
 
   title <- renderTextSolid (font gs) "Jens Mega Haskell Tetris" (Color 255 0 0)
   blitSurface title Nothing s (Just (Rect 330 50 200 400))
@@ -143,7 +145,8 @@ render gs = do
 
   s <- getVideoSurface
 
-  blitSurface (bg gs) Nothing s (Just (Rect 0 0 800 600))
+  let gr = (graphics gs)
+  blitSurface (bg gr) Nothing s (Just (Rect 0 0 800 600))
 
   title <- renderTextSolid (font gs) "Score" (Color 255 0 0)
   blitSurface title Nothing s (Just (Rect 480 60 200 40))
@@ -180,11 +183,12 @@ paint' x y (blk:xs) s gs = do
 
 getBrickGraphics :: GameState -> Blk -> Surface
 getBrickGraphics gs blk = 
-  case  color blk of 
-     Red -> blockGraphics gs !! 0
-     Blue -> blockGraphics gs !! 1
-     Orange -> blockGraphics gs !! 2
-     Violet -> blockGraphics gs !! 3
-     Green -> blockGraphics gs !! 4
-     Yellow -> blockGraphics gs !! 5
-     _ -> blockGraphics gs !! 6
+  let blks = blockGraphics $ (graphics gs)
+  in case  color blk of 
+     Red -> blks !! 0
+     Blue -> blks !! 1
+     Orange -> blks !! 2
+     Violet -> blks !! 3
+     Green -> blks !! 4
+     Yellow -> blks !! 5
+     _ -> blks !! 6

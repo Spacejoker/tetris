@@ -30,10 +30,14 @@ data GameState = GameState{
 	  gen :: StdGen,
 	  mode :: GameMode,
 	  queue :: [Int],
+	  graphics :: Graphics
+        }
+
+data Graphics = Graphics{	
 	  bg :: Surface,
 	  blockGraphics :: [Surface],
 	  menubg :: Surface
-        }
+	}
 
 data GameMode = Menu | GamePlay | Credits
 data Clr = Blue | Red | Orange | Green | Yellow | Cyan | Violet
