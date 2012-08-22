@@ -56,8 +56,10 @@ main = do
   q3 <- SDLi.load "images/quit3.png"
   q4 <- SDLi.load "images/quit4.png"
   let quitAnim = [q0, q1, q2, q3, q4, q3, q2, q1]
-  
-  let graphics = Graphics bg [redBlock, blueBlock, orangeBlock, violetBlock, greenBlock, yellowBlock, cyanBlock] menubg newgameAnim creditAnimation quitAnim 
+ 
+  cm <- SDLi.load "images/choicemarker.png"
+ 
+  let graphics = Graphics bg [redBlock, blueBlock, orangeBlock, violetBlock, greenBlock, yellowBlock, cyanBlock] menubg newgameAnim creditAnimation quitAnim cm
   let newState = GameState True 0 (Block 4 0 0 randomValue) fnt 0 [] stdGen' Menu queue' graphics False 0
 
   gameLoop newState
@@ -127,7 +129,9 @@ handleMenuEvent :: Event -> GameState -> GameState
 handleMenuEvent x gs = 
   case x of
     KeyDown (Keysym SDLK_SPACE _ _) -> newGameState gs
-    KeyDown (Keysym SDLK_RETURN _ _) -> newGameState gs
+    KeyDown (Keysym SDLK_RETURN _ _) -> case menuchoice gs of 
+					  0 -> newGameState gs
+					  _ -> gs {gameActive = False}
     KeyDown (Keysym SDLK_ESCAPE _ _) -> gs { gameActive = False }
     KeyDown (Keysym SDLK_DOWN _ _) -> gs {menuchoice  = min ((menuchoice gs) + 1) 2}
     KeyDown (Keysym SDLK_UP _ _) -> gs {menuchoice  = max ((menuchoice gs) - 1) 0}
@@ -160,19 +164,20 @@ renderMenu gs = do
   title <- renderTextSolid (font gs) "Jens Mega Haskell Tetris" (Color 255 0 0)
   blitSurface title Nothing s (Just (Rect 330 50 200 400))
   
-  title <- renderTextSolid (font gs) "Space to start new  game" (Color 255 0 0)
-  blitSurface title Nothing s (Just (Rect 330 150 200 400))
-
   let animframe = (floor ((fromIntegral (steps gs))/10.0)) `mod` (length (newGame gr)) 
 
   let newimg = if menuchoice gs == 0 then  ((newGame gr) !! animframe ) else (newGame gr) !! 0
-  blitSurface newimg Nothing s (Just (Rect 300 300 350 400))
+  blitSurface newimg Nothing s (Just (Rect 235 300 350 400))
 
   let creditimg = if menuchoice gs == 1 then  ((credits gr) !! animframe ) else (credits gr) !! 0
-  blitSurface creditimg Nothing s (Just (Rect 300 370 350 460))
+  blitSurface creditimg Nothing s (Just (Rect 245 370 350 460))
 
   let quitimg = if menuchoice gs == 2 then  ((quits gr) !! animframe ) else (quits gr) !! 0
-  blitSurface quitimg Nothing s (Just (Rect 300 440 350 520))
+  blitSurface quitimg Nothing s (Just (Rect 245 440 350 520))
+
+  let markery = 314+(menuchoice gs)*70
+  blitSurface (cm gr)  Nothing s (Just (Rect 180 markery 350 520))
+  blitSurface (cm gr)  Nothing s (Just (Rect 594 markery 350 520))
 
   SDL.flip s
 

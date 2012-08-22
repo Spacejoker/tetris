@@ -41,7 +41,8 @@ data Graphics = Graphics{
 	  menubg :: Surface,
 	  newGame :: [Surface],
 	  credits :: [Surface],
-	  quits :: [Surface]
+	  quits :: [Surface],
+	  cm :: Surface
 	}
 
 data GameMode = Menu | GamePlay | Credits
