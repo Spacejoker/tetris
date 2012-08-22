@@ -41,15 +41,23 @@ main = do
   newmenu2 <- SDLi.load "images/newgame2.png"
   newmenu3 <- SDLi.load "images/newgame3.png"
   newmenu4 <- SDLi.load "images/newgame4.png"
+  let newgameAnim = [newmenu0, newmenu1, newmenu2, newmenu3, newmenu4, newmenu3, newmenu2, newmenu1]
 
   credits0 <- SDLi.load "images/credits0.png"
   credits1 <- SDLi.load "images/credits1.png"
   credits2 <- SDLi.load "images/credits2.png"
   credits3 <- SDLi.load "images/credits3.png"
   credits4 <- SDLi.load "images/credits4.png"
-  let menuAnimation = [newmenu0, newmenu1, newmenu2, newmenu3, newmenu4, newmenu3, newmenu2, newmenu1]
   let creditAnimation = [credits0, credits1,  credits2,  credits3,  credits4,  credits3,  credits2,  credits1] 
-  let graphics = Graphics bg [redBlock, blueBlock, orangeBlock, violetBlock, greenBlock, yellowBlock, cyanBlock] menubg menuAnimation creditAnimation 
+  
+  q0 <- SDLi.load "images/quit0.png"
+  q1 <- SDLi.load "images/quit1.png"
+  q2 <- SDLi.load "images/quit2.png"
+  q3 <- SDLi.load "images/quit3.png"
+  q4 <- SDLi.load "images/quit4.png"
+  let quitAnim = [q0, q1, q2, q3, q4, q3, q2, q1]
+  
+  let graphics = Graphics bg [redBlock, blueBlock, orangeBlock, violetBlock, greenBlock, yellowBlock, cyanBlock] menubg newgameAnim creditAnimation quitAnim 
   let newState = GameState True 0 (Block 4 0 0 randomValue) fnt 0 [] stdGen' Menu queue' graphics False 0
 
   gameLoop newState
@@ -121,6 +129,8 @@ handleMenuEvent x gs =
     KeyDown (Keysym SDLK_SPACE _ _) -> newGameState gs
     KeyDown (Keysym SDLK_RETURN _ _) -> newGameState gs
     KeyDown (Keysym SDLK_ESCAPE _ _) -> gs { gameActive = False }
+    KeyDown (Keysym SDLK_DOWN _ _) -> gs {menuchoice  = min ((menuchoice gs) + 1) 2}
+    KeyDown (Keysym SDLK_UP _ _) -> gs {menuchoice  = max ((menuchoice gs) - 1) 0}
     _ -> gs
 
 -- handle the different types of events
@@ -153,10 +163,17 @@ renderMenu gs = do
   title <- renderTextSolid (font gs) "Space to start new  game" (Color 255 0 0)
   blitSurface title Nothing s (Just (Rect 330 150 200 400))
 
-  let imgnr = (floor ((fromIntegral (steps gs))/10.0)) `mod` (length (newGame gr))
-  let newGameFrame = (newGame gr)!! imgnr 
-  blitSurface newGameFrame Nothing s (Just (Rect 300 300 400 400))
- 
+  let animframe = (floor ((fromIntegral (steps gs))/10.0)) `mod` (length (newGame gr)) 
+
+  let newimg = if menuchoice gs == 0 then  ((newGame gr) !! animframe ) else (newGame gr) !! 0
+  blitSurface newimg Nothing s (Just (Rect 300 300 350 400))
+
+  let creditimg = if menuchoice gs == 1 then  ((credits gr) !! animframe ) else (credits gr) !! 0
+  blitSurface creditimg Nothing s (Just (Rect 300 370 350 460))
+
+  let quitimg = if menuchoice gs == 2 then  ((quits gr) !! animframe ) else (quits gr) !! 0
+  blitSurface quitimg Nothing s (Just (Rect 300 440 350 520))
+
   SDL.flip s
 
 render :: GameState -> IO ()

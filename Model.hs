@@ -40,7 +40,8 @@ data Graphics = Graphics{
 	  blockGraphics :: [Surface],
 	  menubg :: Surface,
 	  newGame :: [Surface],
-	  credits :: [Surface]
+	  credits :: [Surface],
+	  quits :: [Surface]
 	}
 
 data GameMode = Menu | GamePlay | Credits
