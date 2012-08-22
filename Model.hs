@@ -30,7 +30,8 @@ data GameState = GameState{
 	  gen :: StdGen,
 	  mode :: GameMode,
 	  queue :: [Int],
-	  graphics :: Graphics
+	  graphics :: Graphics,
+	  lost :: Bool
         }
 
 data Graphics = Graphics{	

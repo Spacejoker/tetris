@@ -36,7 +36,7 @@ main = do
   menubg <- loadBMP "menubg.bmp"
 
   let graphics = Graphics bg [redBlock, blueBlock, orangeBlock, violetBlock, greenBlock, yellowBlock, cyanBlock] menubg
-  let newState = GameState True 0 (Block 4 0 0 randomValue) fnt 0 [] stdGen' Menu queue' graphics
+  let newState = GameState True 0 (Block 4 0 0 randomValue) fnt 0 [] stdGen' Menu queue' graphics False
 
   gameLoop newState
 
@@ -45,7 +45,7 @@ gameLoop gs = do
   gs' <- tickGame gs
  
   if (gameActive gs')
-    then gameLoop  (tick gs')
+    then gameLoop gs'
     else return ()
 
 tickGame :: GameState -> IO GameState
@@ -73,7 +73,9 @@ loopGame gs = do
   delay 10 
 
   render gs'
-  return gs'
+  case lost gs of
+    False -> return (tick gs')
+    True -> return gs'
 
 newGameState :: GameState -> GameState
 newGameState gs = 
@@ -83,11 +85,7 @@ newGameState gs =
       tmp = take queuelength (createRandomList newGenerator)
       stdGen' = snd (tmp !! (queuelength -1))
       queue' = map (\x -> fst x) tmp
-  in gs {
-	 score = 0, steps = 0, field = [], queue = queue', block = Block 4 0 0 randomValue, mode = GamePlay
-	}
---GameState True 0 (Block 4 0 0 randomValue) fnt 0 [] stdGen' Menu queue' bg [redBlock, blueBlock, orangeBlock, violetBlock, greenBlock, yellowBlock, cyanBlock]
-
+  in gs { score = 0, steps = 0, field = [], queue = queue', block = Block 4 0 0 randomValue, mode = GamePlay, lost = False }
 
 -- stolen code from mr cadr, works nice
 getEvents :: IO Event -> [Event] -> IO [Event]
@@ -157,6 +155,11 @@ render gs = do
   paint' leftOffset topOffset (merge (getBlockPositions gs) (field gs)) s gs
 
   paintQueue (queue gs) 0 s gs
+
+  lostText <- renderTextSolid (font gs) "GAME OVER" (Color 255 0 0)
+  case lost gs of
+    True -> blitSurface lostText Nothing s (Just (Rect 350 300 200 40))
+    _ -> return False
 
   SDL.flip s
 

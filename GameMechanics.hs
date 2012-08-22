@@ -35,13 +35,15 @@ createRandomList gen =
   in (x : createRandomList (snd x))
 
 genNewBlock :: GameState -> GameState
-genNewBlock gs = 
-  let
-     (val, gen') = pieceR (gen gs)
-     queue' = tail (queue gs) ++ [val]
-     b = Block 0 0 0 (head (queue gs))
-  in gs {gen = gen', block = b, queue = queue'}
-
+genNewBlock gs =
+  let (val, gen') = pieceR (gen gs)
+      queue' = tail (queue gs) ++ [val]
+      b = Block 0 0 0 (head (queue gs))
+      gs' = gs {gen = gen', block = b, queue = queue'}
+  in case legalPosition 0 0 gs' of 
+    True -> gs'
+    _ -> gs { lost = True } -- player loose
+ 
 makeBlks :: [(Int, Int)] -> Clr -> [Blk]
 makeBlks [x] clr = [Blk x clr]
 makeBlks (x:xs) clr = Blk x clr: makeBlks xs clr
