@@ -23,3 +23,4 @@ cabal install SDL
 
 cabal install SDL-image
 
+To run: ghc --make main.hs
